@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#1a3c6e">
+    <title>移动端适配测试</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mobile-responsive.css">
+    <style>
+        .test-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .test-section h3 {
+            color: var(--text-color);
+            margin: 15px 0 10px;
+            font-size: 16px;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .test-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .test-item i {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .test-item p {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        @media (max-width: 768px) {
+            .test-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="dashboard">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>风险合规管理平台</span>
+            </div>
+            <a href="/test-mobile.html" class="nav-item active">
+                <i class="fa-solid fa-vial"></i> 适配测试
+            </a>
+            <a href="/pages/dashboard.html" class="nav-item">
+                <i class="fa-solid fa-chart-line"></i> 工作台
+            </a>
+            <a href="/pages/contracts.html" class="nav-item">
+                <i class="fa-solid fa-file-contract"></i> 合同管理
+            </a>
+            <a href="/pages/regulations.html" class="nav-item">
+                <i class="fa-solid fa-book"></i> 制度管理
+            </a>
+            <a href="/pages/compliance.html" class="nav-item">
+                <i class="fa-solid fa-clipboard-check"></i> 合规管理
+            </a>
+            <a href="/pages/risks.html" class="nav-item">
+                <i class="fa-solid fa-triangle-exclamation"></i> 风险管理
+            </a>
+            
+            <div class="user-profile">
+                <div class="avatar">测</div>
+                <div>
+                    <div class="font-bold">测试用户</div>
+                    <div class="text-sm" style="opacity: 0.7;">测试部门</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容 -->
+        <div class="main-content">
+            <div class="header">
+                <div>
+                    <h1>移动端适配测试</h1>
+                    <p style="color: var(--text-light); margin-top: 5px;">测试移动端响应式布局和交互</p>
+                </div>
+                <div>
+                    <button class="btn" onclick="window.location.reload()">
+                        <i class="fa-solid fa-refresh"></i> 刷新
+                    </button>
+                </div>
+            </div>
+
+            <!-- 基础信息测试 -->
+            <div class="test-section">
+                <h2><i class="fa-solid fa-info-circle"></i> 基础信息</h2>
+                <div class="test-grid">
+                    <div class="test-item">
+                        <i class="fa-solid fa-mobile-alt"></i>
+                        <p>屏幕宽度: <span id="screen-width">-</span>px</p>
+                    </div>
+                    <div class="test-item">
+                        <i class="fa-solid fa-mobile"></i>
+                        <p>屏幕高度: <span id="screen-height">-</span>px</p>
+                    </div>
+                    <div class="test-item">
+                        <i class="fa-solid fa-expand"></i>
+                        <p>设备像素比: <span id="device-pixel-ratio">-</span></p>
+                    </div>
+                    <div class="test-item">
+                        <i class="fa-solid fa-hand-pointer"></i>
+                        <p>触摸设备: <span id="is-touch">-</span></p>
+                    </div>
+                    <div class="test-item">
+                        <i class="fa-solid fa-arrows-alt"></i>
+                        <p>设备方向: <span id="orientation">-</span></p>
+                    </div>
+                    <div class="test-item">
+                        <i class="fa-solid fa-user-agent"></i>
+                        <p>用户代理: <span id="user-agent">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI卡片测试 -->
+            <div class="test-section">
+                <h2><i class="fa-solid fa-chart-bar"></i> KPI卡片测试</h2>
+                <div class="kpi-cards">
+                    <div class="kpi-card">
+                        <div class="kpi-info">
+                            <h3>测试数据1</h3>
+                            <p>123</p>
+                        </div>
+                        <div class="kpi-icon bg-blue"><i class="fa-solid fa-test"></i></div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-info">
+                            <h3>测试数据2</h3>
+                            <p>456</p>
+                        </div>
+                        <div class="kpi-icon bg-green"><i class="fa-solid fa-test"></i></div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-info">
+                            <h3>测试数据3</h3>
+                            <p>789</p>
+                        </div>
+                        <div class="kpi-icon bg-orange"><i class="fa-solid fa-test"></i></div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-info">
+                            <h3>测试数据4</h3>
+                            <p>012</p>
+                        </div>
+                        <div class="kpi-icon bg-red"><i class="fa-solid fa-test"></i></div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-info">
+                            <h3>测试数据5</h3>
+                            <p>345</p>
+                        </div>
+                        <div class="kpi-icon bg-purple"><i class="fa-solid fa-test"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 表格测试 -->
+            <div class="test-section">
+                <h2><i class="fa-solid fa-table"></i> 表格测试</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>测试列1</th>
+                                <th>测试列2</th>
+                                <th>测试列3</th>
+                                <th>测试列4</th>
+                                <th>测试列5</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>测试数据1</td>
+                                <td>测试数据2</td>
+                                <td>测试数据3</td>
+                                <td>测试数据4</td>
+                                <td>测试数据5</td>
+                                <td>
+                                    <button class="btn" style="padding: 5px 10px; font-size: 12px;">编辑</button>
+                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">删除</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>测试数据6</td>
+                                <td>测试数据7</td>
+                                <td>测试数据8</td>
+                                <td>测试数据9</td>
+                                <td>测试数据10</td>
+                                <td>
+                                    <button class="btn" style="padding: 5px 10px; font-size: 12px;">编辑</button>
+                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">删除</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 表单测试 -->
+            <div class="test-section">
+                <h2><i class="fa-solid fa-edit"></i> 表单测试</h2>
+                <form id="test-form">
+                    <div class="form-group">
+                        <label>文本输入</label>
+                        <input type="text" placeholder="请输入文本">
+                    </div>
+                    <div class="form-group">
+                        <label>下拉选择</label>
+                        <select>
+                            <option>选项1</option>
+                            <option>选项2</option>
+                            <option>选项3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>文本域</label>
+                        <textarea rows="3" placeholder="请输入多行文本"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>搜索框</label>
+                        <input type="text" class="search-box" placeholder="搜索...">
+                    </div>
+                    <div class="form-group">
+                        <label>筛选下拉框</label>
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>选项1</option>
+                            <option>选项2</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn">提交</button>
+                        <button type="reset" class="btn btn-secondary">重置</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 按钮测试 -->
+            <div class="test-section">
+                <h2><i class="fa-solid fa-buttons"></i> 按钮测试</h2>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <button class="btn">主要按钮</button>
+                    <button class="btn btn-secondary">次要按钮</button>
+                    <button class="btn btn-danger">危险按钮</button>
+                    <button class="btn"><i class="fa-solid fa-plus"></i> 带图标按钮</button>
+                </div>
+            </div>
+
+            <!-- 模态框测试 -->
+            <div class="test-section">
+                <h2><i class="fa-solid fa-window-maximize"></i> 模态框测试</h2>
+                <button class="btn" onclick="openModal()">打开模态框</button>
+            </div>
+
+            <!-- 工具栏测试 -->
+            <div class="test-section">
+                <h2><i class="fa-solid fa-tools"></i> 工具栏测试</h2>
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <input type="text" class="search-box" placeholder="搜索...">
+                        <select class="filter-select">
+                            <option>全部</option>
+                            <option>选项1</option>
+                            <option>选项2</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn"><i class="fa-solid fa-plus"></i> 新增</button>
+                        <button class="btn btn-secondary"><i class="fa-solid fa-download"></i> 导出</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提示信息测试 -->
+            <div class="test-section">
+                <h2><i class="fa-solid fa-bell"></i> 提示信息测试</h2>
+                <div class="alert alert-success">成功提示信息</div>
+                <div class="alert alert-error">错误提示信息</div>
+                <div class="alert alert-warning">警告提示信息</div>
+            </div>
+
+            <!-- 分页测试 -->
+            <div class="test-section">
+                <h2><i class="fa-solid fa-pager"></i> 分页测试</h2>
+                <div class="pagination">
+                    <button disabled>上一页</button>
+                    <button>1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <span>...</span>
+                    <button>10</button>
+                    <button>下一页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 测试模态框 -->
+    <div id="test-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>测试模态框</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>这是一个测试模态框，用于测试移动端模态框的显示效果。</p>
+                <div class="form-group">
+                    <label>测试输入</label>
+                    <input type="text" placeholder="请输入...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn" onclick="closeModal()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/mobile-menu.js"></script>
+    <script>
+        // 更新设备信息
+        function updateDeviceInfo() {
+            document.getElementById('screen-width').textContent = window.innerWidth;
+            document.getElementById('screen-height').textContent = window.innerHeight;
+            document.getElementById('device-pixel-ratio').textContent = window.devicePixelRatio || 1;
+            document.getElementById('is-touch').textContent = 'ontouchstart' in window ? '是' : '否';
+            
+            // 设备方向
+            if (window.innerWidth > window.innerHeight) {
+                document.getElementById('orientation').textContent = '横屏';
+            } else {
+                document.getElementById('orientation').textContent = '竖屏';
+            }
+            
+            // 用户代理（简化显示）
+            const ua = navigator.userAgent;
+            if (ua.includes('iPhone')) {
+                document.getElementById('user-agent').textContent = 'iPhone';
+            } else if (ua.includes('iPad')) {
+                document.getElementById('user-agent').textContent = 'iPad';
+            } else if (ua.includes('Android')) {
+                document.getElementById('user-agent').textContent = 'Android';
+            } else {
+                document.getElementById('user-agent').textContent = '其他';
+            }
+        }
+
+        // 初始更新
+        updateDeviceInfo();
+
+        // 窗口大小改变时更新
+        window.addEventListener('resize', updateDeviceInfo);
+
+        // 方向改变时更新
+        window.addEventListener('orientationchange', updateDeviceInfo);
+
+        // 模态框控制
+        function openModal() {
+            document.getElementById('test-modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('test-modal').classList.remove('show');
+        }
+
+        // 表单提交测试
+        document.getElementById('test-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('表单提交测试成功！');
+        });
+
+        // KPI卡片点击测试
+        document.querySelectorAll('.kpi-card').forEach(card => {
+            card.addEventListener('click', function() {
+                alert('KPI卡片点击测试！');
+            });
+        });
+
+        // 表格行点击测试
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', function() {
+                alert('表格行点击测试！');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,895 @@
+/* ========================================
+   移动端响应式样式表
+   法务合规管理系统
+   ======================================== */
+
+/* ========================================
+   1. 移动端基础样式重置
+   ======================================== */
+
+/* 移动端触摸优化 */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+/* 禁用缩放以提高性能 */
+html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* 移动端滚动优化 */
+body {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+}
+
+/* ========================================
+   2. 移动端导航菜单
+   ======================================== */
+
+/* 移动端菜单按钮 */
+.mobile-menu-btn {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+    background: var(--secondary-color);
+    transform: scale(1.05);
+}
+
+/* 移动端遮罩层 */
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* 移动端侧边栏样式 */
+@media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: block;
+    }
+    
+    .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sidebar.active {
+        left: 0;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 70px 15px 15px;
+    }
+    
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .header h1 {
+        font-size: 20px;
+    }
+}
+
+/* ========================================
+   3. 移动端KPI卡片优化
+   ======================================== */
+
+@media (max-width: 1200px) {
+    .kpi-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .kpi-card {
+        padding: 15px;
+    }
+    
+    .kpi-info h3 {
+        font-size: 13px;
+    }
+    
+    .kpi-info p {
+        font-size: 20px;
+    }
+    
+    .kpi-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .kpi-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .kpi-card {
+        padding: 12px;
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .kpi-info h3 {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+    
+    .kpi-info p {
+        font-size: 18px;
+    }
+    
+    .kpi-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        border-radius: 10px;
+    }
+}
+
+/* ========================================
+   4. 移动端表格优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* 表格容器 */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -15px;
+        padding: 0 15px;
+    }
+    
+    /* 表格样式 */
+    table {
+        min-width: 600px;
+        font-size: 13px;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+        white-space: nowrap;
+    }
+    
+    /* 表格操作按钮 */
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    /* 表格状态标签 */
+    .status {
+        padding: 3px 6px;
+        font-size: 11px;
+    }
+}
+
+/* ========================================
+   5. 移动端表单优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* 表单组 */
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px;
+        font-size: 16px; /* 防止iOS缩放 */
+        border-radius: 6px;
+    }
+    
+    /* 表单按钮 */
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    /* 搜索框 */
+    .search-box {
+        width: 100%;
+        font-size: 16px;
+    }
+    
+    /* 筛选下拉框 */
+    .filter-select {
+        width: 100%;
+        font-size: 16px;
+    }
+}
+
+/* ========================================
+   6. 移动端模态框优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        padding: 20px;
+        margin: 10px;
+        max-height: 85vh;
+    }
+    
+    .modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .modal-header h2 {
+        font-size: 18px;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 28px;
+    }
+}
+
+/* ========================================
+   7. 移动端工具栏优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .toolbar-left,
+    .toolbar-right {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .toolbar-left > *,
+    .toolbar-right > * {
+        width: 100%;
+    }
+    
+    .toolbar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* 工具栏按钮组 */
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+    }
+}
+
+/* ========================================
+   8. 移动端图表优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .chart-card {
+        padding: 15px;
+    }
+    
+    .chart-header {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+    
+    /* 图表容器 */
+    .chart-container {
+        position: relative;
+        height: 250px;
+    }
+    
+    /* 图表图例 */
+    .chart-legend {
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 12px;
+    }
+}
+
+/* ========================================
+   9. 移动端底部网格优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    .bottom-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .bottom-grid > div {
+        padding: 15px;
+    }
+    
+    .bottom-grid h3 {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+}
+
+/* ========================================
+   10. 移动端数据汇总模块优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    .summary-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .summary-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding-bottom: 12px;
+    }
+    
+    .summary-header h2 {
+        font-size: 16px;
+    }
+    
+    .summary-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .summary-total-card {
+        position: static;
+        padding: 15px;
+    }
+    
+    .summary-total-card h3 {
+        font-size: 14px;
+    }
+    
+    .summary-total-card p {
+        font-size: 20px;
+    }
+    
+    .distribution-section {
+        padding: 15px;
+    }
+    
+    .distribution-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .distribution-header h3 {
+        font-size: 13px;
+    }
+    
+    .department-search {
+        width: 100%;
+    }
+    
+    .dept-search-input {
+        width: 100%;
+    }
+    
+    .department-section {
+        max-height: 250px;
+    }
+    
+    .department-stats-wrapper {
+        max-height: 180px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .stats-grid .stat-item {
+        padding: 8px;
+    }
+    
+    .stats-grid .stat-label {
+        font-size: 11px;
+    }
+    
+    .stats-grid .stat-value {
+        font-size: 14px;
+    }
+    
+    .stats-list .stat-item {
+        padding: 8px 10px;
+    }
+    
+    .stats-list .stat-label {
+        font-size: 12px;
+    }
+    
+    .stats-list .stat-value {
+        font-size: 13px;
+    }
+}
+
+/* ========================================
+   11. 移动端登录页面优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    .login-box {
+        width: 90%;
+        max-width: 350px;
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    .login-box h2 {
+        font-size: 20px;
+    }
+    
+    .login-box .input-group {
+        margin-bottom: 15px;
+    }
+    
+    .login-box .input-group label {
+        font-size: 14px;
+    }
+    
+    .login-box .input-group input {
+        padding: 12px;
+        font-size: 16px;
+    }
+    
+    .login-box .btn-login {
+        padding: 14px;
+        font-size: 16px;
+    }
+    
+    .login-box .test-accounts {
+        font-size: 11px;
+    }
+}
+
+/* ========================================
+   12. 移动端分页优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    .pagination {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    .pagination button {
+        padding: 6px 10px;
+        font-size: 12px;
+        min-width: 36px;
+    }
+    
+    .pagination span {
+        font-size: 12px;
+    }
+}
+
+/* ========================================
+   13. 移动端提示信息优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    .alert {
+        padding: 10px 15px;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+}
+
+/* ========================================
+   14. 移动端加载动画优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    .loading {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* ========================================
+   15. 移动端通用工具类
+   ======================================== */
+
+/* 移动端隐藏类 */
+@media (max-width: 768px) {
+    .mobile-hidden {
+        display: none !important;
+    }
+}
+
+/* 移动端显示类 */
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-only {
+        display: block;
+    }
+}
+
+/* 移动端文本截断 */
+.mobile-text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 移动端间距工具 */
+@media (max-width: 768px) {
+    .mobile-mt-0 { margin-top: 0 !important; }
+    .mobile-mt-1 { margin-top: 5px !important; }
+    .mobile-mt-2 { margin-top: 10px !important; }
+    .mobile-mt-3 { margin-top: 15px !important; }
+    .mobile-mt-4 { margin-top: 20px !important; }
+    
+    .mobile-mb-0 { margin-bottom: 0 !important; }
+    .mobile-mb-1 { margin-bottom: 5px !important; }
+    .mobile-mb-2 { margin-bottom: 10px !important; }
+    .mobile-mb-3 { margin-bottom: 15px !important; }
+    .mobile-mb-4 { margin-bottom: 20px !important; }
+    
+    .mobile-p-0 { padding: 0 !important; }
+    .mobile-p-1 { padding: 5px !important; }
+    .mobile-p-2 { padding: 10px !important; }
+    .mobile-p-3 { padding: 15px !important; }
+    .mobile-p-4 { padding: 20px !important; }
+}
+
+/* ========================================
+   16. 移动端触摸优化
+   ======================================== */
+
+/* 按钮触摸反馈 */
+@media (max-width: 768px) {
+    .btn {
+        min-height: 44px; /* iOS推荐的最小触摸区域 */
+        min-width: 44px;
+    }
+    
+    .nav-item {
+        min-height: 44px;
+    }
+    
+    .kpi-card {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    
+    .kpi-card:active {
+        transform: scale(0.98);
+    }
+    
+    .table-row {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .table-row:active {
+        background-color: #f0f0f0;
+    }
+}
+
+/* ========================================
+   17. 移动端安全区域适配
+   ======================================== */
+
+@supports (padding: max(0px)) {
+    @media (max-width: 768px) {
+        .sidebar {
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+        
+        .main-content {
+            padding-top: max(70px, calc(70px + env(safe-area-inset-top)));
+            padding-bottom: max(15px, calc(15px + env(safe-area-inset-bottom)));
+        }
+        
+        .mobile-menu-btn {
+            top: max(15px, calc(15px + env(safe-area-inset-top)));
+        }
+    }
+}
+
+/* ========================================
+   18. 移动端动画优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* 减少动画以提高性能 */
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    /* 但保留必要的过渡效果 */
+    .sidebar,
+    .modal,
+    .btn,
+    .nav-item {
+        transition-duration: 0.3s !important;
+    }
+}
+
+/* ========================================
+   19. 移动端字体优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    h1 {
+        font-size: 20px;
+    }
+    
+    h2 {
+        font-size: 18px;
+    }
+    
+    h3 {
+        font-size: 16px;
+    }
+    
+    h4 {
+        font-size: 14px;
+    }
+    
+    /* 确保输入框字体大小足够大 */
+    input, select, textarea {
+        font-size: 16px;
+    }
+}
+
+/* ========================================
+   20. 移动端横屏优化
+   ======================================== */
+
+@media (max-width: 768px) and (orientation: landscape) {
+    .login-box {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-content {
+        max-height: 80vh;
+    }
+    
+    .sidebar {
+        width: 250px;
+    }
+}
+
+/* ========================================
+   21. 移动端高分辨率屏幕优化
+   ======================================== */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    @media (max-width: 768px) {
+        /* 提高边框清晰度 */
+        .kpi-card,
+        .chart-card,
+        .summary-section,
+        .modal-content {
+            border-width: 0.5px;
+        }
+        
+        /* 提高表格边框清晰度 */
+        th, td {
+            border-width: 0.5px;
+        }
+    }
+}
+
+/* ========================================
+   22. 移动端特殊设备适配
+   ======================================== */
+
+/* iPhone X及以上刘海屏适配 */
+@supports (padding: max(0px)) {
+    @media (max-width: 768px) {
+        .mobile-menu-btn {
+            left: max(15px, env(safe-area-inset-left));
+        }
+        
+        .sidebar {
+            left: -280px;
+        }
+        
+        .sidebar.active {
+            left: 0;
+        }
+    }
+}
+
+/* 小屏幕手机适配 (iPhone SE等) */
+@media (max-width: 375px) {
+    .login-box {
+        padding: 20px 15px;
+    }
+    
+    .kpi-card {
+        padding: 10px;
+    }
+    
+    .kpi-info h3 {
+        font-size: 11px;
+    }
+    
+    .kpi-info p {
+        font-size: 16px;
+    }
+    
+    .kpi-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+    
+    .modal-content {
+        padding: 15px;
+    }
+    
+    .summary-section {
+        padding: 12px;
+    }
+}
+
+/* ========================================
+   23. 移动端性能优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* 延迟加载图片 */
+    img {
+        loading: lazy;
+    }
+    
+    /* 优化复杂选择器 */
+    .kpi-card,
+    .chart-card,
+    .summary-section {
+        will-change: transform;
+    }
+    
+    /* 减少重绘 */
+    .sidebar,
+    .modal {
+        backface-visibility: hidden;
+        perspective: 1000px;
+    }
+}
+
+/* ========================================
+   24. 移动端无障碍优化
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* 确保足够的对比度 */
+    .text-light {
+        color: #555;
+    }
+    
+    /* 确保可点击元素足够大 */
+    a, button, .btn, .nav-item {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* 焦点样式 */
+    *:focus {
+        outline: 2px solid var(--accent-color);
+        outline-offset: 2px;
+    }
+}
+
+/* ========================================
+   25. 移动端打印优化
+   ======================================== */
+
+@media print and (max-width: 768px) {
+    .sidebar,
+    .mobile-menu-btn,
+    .btn,
+    .toolbar {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin: 0;
+        padding: 0;
+    }
+    
+    body {
+        background: white;
+    }
+}

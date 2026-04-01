@@ -2,10 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#1a3c6e">
     <title>法务合规管理系统 - 工作台</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mobile-responsive.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -40,6 +44,8 @@
                 </div>
             </div>
         </div>
+        
+        <!-- 移动端菜单按钮和遮罩层将由mobile-menu.js自动添加 -->
 
         <!-- 主内容 -->
         <div class="main-content">
@@ -362,5 +368,6 @@
             `).join('');
         }
     </script>
+    <script src="/js/mobile-menu.js"></script>
 </body>
 </html>

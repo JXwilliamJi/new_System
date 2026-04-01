@@ -556,6 +556,179 @@ th {
     .toolbar-right {
         flex-direction: column;
     }
+    
+    /* 移动端表格优化 */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -15px;
+        padding: 0 15px;
+    }
+    
+    table {
+        min-width: 600px;
+        font-size: 13px;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+        white-space: nowrap;
+    }
+    
+    /* 移动端表单优化 */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px;
+    }
+    
+    /* 移动端模态框优化 */
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        padding: 20px;
+        margin: 10px;
+        max-height: 85vh;
+    }
+    
+    /* 移动端按钮优化 */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* 移动端导航项优化 */
+    .nav-item {
+        min-height: 44px;
+    }
+    
+    /* 移动端KPI卡片优化 */
+    .kpi-card {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    
+    .kpi-card:active {
+        transform: scale(0.98);
+    }
+    
+    /* 移动端表格行优化 */
+    .table-row {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .table-row:active {
+        background-color: #f0f0f0;
+    }
+    
+    /* 移动端安全区域适配 */
+    @supports (padding: max(0px)) {
+        .sidebar {
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+        
+        .main-content {
+            padding-top: max(70px, calc(70px + env(safe-area-inset-top)));
+            padding-bottom: max(15px, calc(15px + env(safe-area-inset-bottom)));
+        }
+    }
+    
+    /* 移动端字体优化 */
+    body {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    h1 {
+        font-size: 20px;
+    }
+    
+    h2 {
+        font-size: 18px;
+    }
+    
+    h3 {
+        font-size: 16px;
+    }
+    
+    /* 移动端提示信息优化 */
+    .alert {
+        padding: 10px 15px;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+    
+    /* 移动端分页优化 */
+    .pagination {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    .pagination button {
+        padding: 6px 10px;
+        font-size: 12px;
+        min-width: 36px;
+    }
+    
+    .pagination span {
+        font-size: 12px;
+    }
+    
+    /* 移动端加载动画优化 */
+    .loading {
+        width: 16px;
+        height: 16px;
+    }
+    
+    /* 移动端无障碍优化 */
+    a, button, .btn, .nav-item {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    *:focus {
+        outline: 2px solid var(--accent-color);
+        outline-offset: 2px;
+    }
+    
+    /* 移动端性能优化 */
+    img {
+        loading: lazy;
+    }
+    
+    .kpi-card,
+    .chart-card,
+    .summary-section {
+        will-change: transform;
+    }
+    
+    .sidebar,
+    .modal {
+        backface-visibility: hidden;
+        perspective: 1000px;
+    }
+    
+    /* 移动端打印优化 */
+    @media print {
+        .sidebar,
+        .mobile-menu-btn,
+        .btn,
+        .toolbar {
+            display: none !important;
+        }
+        
+        .main-content {
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background: white;
+        }
+    }
 }
 
 /* 数据汇总模块样式 */
