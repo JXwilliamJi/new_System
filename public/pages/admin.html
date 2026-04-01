@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#1a3c6e">
-    <title>法务合规管理系统 - 后台管理</title>
+    <title>法务合规管理平台 - 后台管理</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/mobile-responsive.css">
@@ -473,8 +473,8 @@
                 <li><a href="#" data-section="compliance-types"><i class="fa-solid fa-tags"></i> 合规类型</a></li>
                 <li><a href="#" data-section="departments"><i class="fa-solid fa-building"></i> 部门配置</a></li>
                 <li><a href="#" data-section="users"><i class="fa-solid fa-users"></i> 用户管理</a></li>
-                <li><a href="#" data-section="stats"><i class="fa-solid fa-chart-bar"></i> 系统统计</a></li>
-                <li><a href="#" data-section="logs"><i class="fa-solid fa-list"></i> 系统日志</a></li>
+                <li><a href="#" data-section="stats"><i class="fa-solid fa-chart-bar"></i> 平台统计</a></li>
+                <li><a href="#" data-section="logs"><i class="fa-solid fa-list"></i> 平台日志</a></li>
                 <li><a href="/pages/dashboard.html"><i class="fa-solid fa-arrow-left"></i> 返回前台</a></li>
             </ul>
             <div style="position: absolute; bottom: 20px; left: 0; right: 0; padding: 0 15px;">
@@ -487,8 +487,8 @@
         <!-- 主内容区 -->
         <div class="admin-content">
             <div class="admin-header">
-                <h1>系统后台管理</h1>
-                <p style="color: #666; margin: 5px 0 0 0;">管理系统模块、用户和配置</p>
+                <h1>平台后台管理</h1>
+                <p style="color: #666; margin: 5px 0 0 0;">管理平台模块、用户和配置</p>
             </div>
 
             <!-- 模块配置 -->
@@ -578,17 +578,17 @@
                 </table>
             </div>
 
-            <!-- 系统统计 -->
+            <!-- 平台统计 -->
             <div id="stats-section" class="admin-section" style="display: none;">
-                <h2><i class="fa-solid fa-chart-bar"></i> 系统统计</h2>
+                <h2><i class="fa-solid fa-chart-bar"></i> 平台统计</h2>
                 <div id="stats-grid" class="stats-grid">
                     <div style="text-align: center; padding: 20px;">加载中...</div>
                 </div>
             </div>
 
-            <!-- 系统日志 -->
+            <!-- 平台日志 -->
             <div id="logs-section" class="admin-section" style="display: none;">
-                <h2><i class="fa-solid fa-list"></i> 系统日志</h2>
+                <h2><i class="fa-solid fa-list"></i> 平台日志</h2>
                 <div id="logs-list">
                     <div style="text-align: center; padding: 20px;">加载中...</div>
                 </div>
@@ -1138,7 +1138,7 @@
             }
         });
 
-        // 加载系统统计
+        // 加载平台统计
         async function loadStats() {
             try {
                 const response = await apiGet('/admin/stats');
@@ -1146,7 +1146,7 @@
                     renderStats(response.data);
                 }
             } catch (error) {
-                console.error('加载系统统计失败:', error);
+                console.error('加载平台统计失败:', error);
                 document.getElementById('stats-grid').innerHTML = '<div style="text-align: center; padding: 20px; color: red;">加载失败</div>';
             }
         }
@@ -1188,7 +1188,7 @@
             `;
         }
 
-        // 加载系统日志
+        // 加载平台日志
         async function loadLogs() {
             try {
                 const response = await apiGet('/admin/logs');
@@ -1196,7 +1196,7 @@
                     renderLogs(response.data);
                 }
             } catch (error) {
-                console.error('加载系统日志失败:', error);
+                console.error('加载平台日志失败:', error);
                 document.getElementById('logs-list').innerHTML = '<div style="text-align: center; padding: 20px; color: red;">加载失败</div>';
             }
         }

@@ -1,7 +1,7 @@
 {
   "name": "legal-compliance-system",
   "version": "1.0.0",
-  "description": "企业法务合规管理系统 - 包含合同管理、制度管理、合规管理、风险管理",
+  "description": "企业法务合规管理平台 - 包含合同管理、制度管理、合规管理、风险管理",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

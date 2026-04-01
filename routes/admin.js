@@ -95,7 +95,7 @@ router.put('/modules/batch', authenticateToken, requireAdmin, (req, res) => {
   }
 });
 
-// 获取系统统计信息
+// 获取平台统计信息
 router.get('/stats', authenticateToken, requireAdmin, (req, res) => {
   try {
     const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
@@ -117,7 +117,7 @@ router.get('/stats', authenticateToken, requireAdmin, (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取系统统计错误:', error);
+    console.error('获取平台统计错误:', error);
     res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
@@ -214,10 +214,10 @@ router.delete('/users/:id', authenticateToken, requireAdmin, (req, res) => {
   }
 });
 
-// 获取系统日志（最近100条）
+// 获取平台日志（最近100条）
 router.get('/logs', authenticateToken, requireAdmin, (req, res) => {
   try {
-    // 这里可以扩展为真正的日志系统
+    // 这里可以扩展为真正的日志平台
     // 目前返回一些模拟数据
     const logs = [
       { id: 1, action: '用户登录', user: 'admin', time: new Date().toISOString(), ip: '127.0.0.1' },
@@ -226,7 +226,7 @@ router.get('/logs', authenticateToken, requireAdmin, (req, res) => {
     ];
     res.json({ success: true, data: logs });
   } catch (error) {
-    console.error('获取系统日志错误:', error);
+    console.error('获取平台日志错误:', error);
     res.status(500).json({ success: false, message: '服务器错误' });
   }
 });

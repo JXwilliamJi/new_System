@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#1a3c6e">
-    <title>法务合规管理系统 - 工作台</title>
+    <title>法务合规管理平台 - 工作台</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/mobile-responsive.css">
@@ -51,7 +51,7 @@
         <div class="main-content">
             <div class="header">
                 <div>
-                    <h1>法务合规概览</h1>
+                    <h1>风险合规管理概览</h1>
                     <p style="color: var(--text-light); margin-top: 5px;" id="current-date"></p>
                 </div>
                 <div>
@@ -71,7 +71,7 @@
                 </select>
             </div>
 
-            <!-- 法务合规概览统计卡片 -->
+            <!-- 风险合规管理概览统计卡片 -->
             <div class="kpi-cards">
                 <div class="kpi-card">
                     <div class="kpi-info">
@@ -193,7 +193,7 @@
             document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN', options);
         }
 
-        // 加载法务合规概览统计
+        // 加载风险合规管理概览统计
         async function loadComplianceOverview() {
             const year = document.getElementById('year-select').value;
             
@@ -211,14 +211,14 @@
                     document.getElementById('rectification-rate').textContent = data.rectificationRate + '%';
                 }
             } catch (error) {
-                console.error('加载法务合规概览统计失败:', error);
+                console.error('加载风险合规管理概览统计失败:', error);
             }
         }
 
         // 加载仪表板数据
         async function loadDashboardData() {
             try {
-                // 加载法务合规概览统计
+                // 加载风险合规管理概览统计
                 loadComplianceOverview();
 
                 // 加载趋势数据

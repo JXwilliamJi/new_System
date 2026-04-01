@@ -148,13 +148,13 @@ const insertModule = db.prepare(`
   VALUES (?, ?, ?, ?, ?)
 `);
 
-insertModule.run('dashboard', '仪表盘', 1, 1, '系统概览和数据统计');
+insertModule.run('dashboard', '仪表盘', 1, 1, '平台概览和数据统计');
 insertModule.run('contracts', '合同管理', 1, 2, '管理各类合同信息');
 insertModule.run('regulations', '制度管理', 1, 3, '管理公司制度规范');
 insertModule.run('compliance', '合规检查', 1, 4, '管理合规检查任务');
 insertModule.run('risks', '风险管理', 1, 5, '管理风险事项');
 insertModule.run('department_work', '部门工作', 1, 6, '管理部门工作事项');
-insertModule.run('admin', '后台管理', 1, 7, '系统后台管理配置');
+insertModule.run('admin', '后台管理', 1, 7, '平台后台管理配置');
 
 // 插入初始用户数据（密码是加密的）
 const insertUser = db.prepare(`

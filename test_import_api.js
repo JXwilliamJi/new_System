@@ -42,7 +42,7 @@ console.log('----------------------------------------');
 console.log('');
 console.log('🚀 使用方法:');
 console.log('1. 启动服务器: npm start');
-console.log('2. 登录系统 (admin / admin123)');
+console.log('2. 登录平台 (admin / admin123)');
 console.log('3. 进入合规管理模块');
 console.log('4. 点击"导入Excel"按钮');
 console.log('5. 选择 test_compliance.xlsx 文件');

@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/api', (req, res) => {
   res.json({
     success: true,
-    message: '法务合规管理系统 API',
+    message: '法务合规管理平台 API',
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
@@ -82,7 +82,7 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 法务合规管理系统服务器运行在 http://localhost:${PORT}`);
+  console.log(`🚀 法务合规管理平台服务器运行在 http://localhost:${PORT}`);
   console.log(`📊 API 文档: http://localhost:${PORT}/api`);
 });
 

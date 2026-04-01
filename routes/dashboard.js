@@ -195,7 +195,7 @@ router.get('/latest-regulations', (req, res) => {
   }
 });
 
-// 获取法务合规概览统计
+// 获取风险合规管理概览统计
 router.get('/compliance-overview', (req, res) => {
   try {
     const year = req.query.year || new Date().getFullYear();
@@ -275,7 +275,7 @@ router.get('/compliance-overview', (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取法务合规概览统计错误:', error);
+    console.error('获取风险合规管理概览统计错误:', error);
     res.status(500).json({
       success: false,
       message: '服务器错误'
