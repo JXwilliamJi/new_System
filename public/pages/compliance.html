@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>法务合规管理系统 - 合规管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .main-content {
+            overflow-y: auto;
+            height: 100vh;
+            padding-bottom: 80px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div id="dashboard">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>风险合规管理平台</span>
+            </div>
+            <a href="/pages/dashboard.html" class="nav-item">
+                <i class="fa-solid fa-chart-line"></i> 工作台
+            </a>
+            <a href="/pages/contracts.html" class="nav-item">
+                <i class="fa-solid fa-file-contract"></i> 合同管理
+            </a>
+            <a href="/pages/regulations.html" class="nav-item">
+                <i class="fa-solid fa-book"></i> 制度管理
+            </a>
+            <a href="/pages/compliance.html" class="nav-item active">
+                <i class="fa-solid fa-clipboard-check"></i> 合规管理
+            </a>
+            <a href="/pages/risks.html" class="nav-item">
+                <i class="fa-solid fa-triangle-exclamation"></i> 风险管理
+            </a>
+            
+            <div class="user-profile">
+                <div class="avatar">法</div>
+                <div>
+                    <div class="font-bold">用户</div>
+                    <div class="text-sm" style="opacity: 0.7;">部门</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容 -->
+        <div class="main-content">
+            <div class="header">
+                <div>
+                    <h1>合规管理</h1>
+                    <p style="color: var(--text-light); margin-top: 5px;">管理合规检查事项</p>
+                </div>
+                <div>
+                    <button class="btn btn-secondary" onclick="showImportModal()">
+                        <i class="fa-solid fa-file-import"></i> 导入Excel
+                    </button>
+                    <button class="btn" onclick="showAddModal()">
+                        <i class="fa-solid fa-plus"></i> 新增检查
+                    </button>
+                </div>
+            </div>
+
+            <!-- 数据汇总模块 -->
+            <div class="summary-section">
+                <div class="summary-header">
+                    <h2><i class="fa-solid fa-chart-pie"></i> 数据汇总</h2>
+                    <div class="summary-header-right">
+                        <select id="summary-year-filter" class="filter-select" onchange="loadSummaryData()">
+                            <option value="">全部年份</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="loadSummaryData()">
+                            <i class="fa-solid fa-refresh"></i> 刷新
+                        </button>
+                    </div>
+                </div>
+                <div class="summary-container">
+                    <!-- 左侧：总数统计 -->
+                    <div class="summary-total-card">
+                        <div class="summary-icon bg-blue">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3>审查事项总数</h3>
+                            <p id="total-count">-</p>
+                        </div>
+                        <!-- 状态统计 -->
+                        <div class="status-summary">
+                            <div class="status-item">
+                                <span class="status-dot status-pending"></span>
+                                <span>待检查: <strong id="pending-count">0</strong></span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-dot status-completed"></span>
+                                <span>已完成: <strong id="completed-count">0</strong></span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-dot status-failed"></span>
+                                <span>未通过: <strong id="failed-count">0</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧：分布统计 -->
+                    <div class="summary-distribution">
+                        <!-- 按类型分布（横向排列） -->
+                        <div class="distribution-section">
+                            <div class="distribution-header">
+                                <div class="summary-icon bg-green">
+                                    <i class="fa-solid fa-tags"></i>
+                                </div>
+                                <h3>按类型分布</h3>
+                            </div>
+                            <div id="type-stats" class="stats-grid">-</div>
+                        </div>
+                        
+                        <!-- 按部门分布（可滚动列表） -->
+                        <div class="distribution-section department-section">
+                            <div class="distribution-header">
+                                <div class="summary-icon bg-purple">
+                                    <i class="fa-solid fa-building"></i>
+                                </div>
+                                <h3>按部门分布</h3>
+                                <div class="department-search">
+                                    <input type="text" id="dept-search" placeholder="搜索部门..." class="dept-search-input">
+                                </div>
+                            </div>
+                            <div class="department-stats-wrapper">
+                                <div id="department-stats" class="stats-list">-</div>
+                            </div>
+                            <div class="department-footer">
+                                <span id="dept-showing">显示 0 个部门</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <input type="text" class="search-box" id="search-input" placeholder="搜索检查...">
+                    <select class="filter-select" id="status-filter">
+                        <option value="">全部状态</option>
+                        <option value="pending">待检查</option>
+                        <option value="completed">已完成</option>
+                        <option value="failed">未通过</option>
+                    </select>
+                    <select class="filter-select" id="type-filter">
+                        <option value="">全部类型</option>
+                        <option value="数据安全">数据安全</option>
+                        <option value="反洗钱">反洗钱</option>
+                        <option value="反腐败">反腐败</option>
+                        <option value="知识产权">知识产权</option>
+                        <option value="劳动合规">劳动合规</option>
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-secondary" onclick="loadComplianceChecks()">
+                        <i class="fa-solid fa-refresh"></i> 刷新
+                    </button>
+                </div>
+            </div>
+
+            <!-- 合规检查列表 -->
+            <div class="chart-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>检查标题</th>
+                            <th>类型</th>
+                            <th>提交部门</th>
+                            <th>经办人</th>
+                            <th>检查日期</th>
+                            <th>检查结果</th>
+                            <th>状态</th>
+                            <th>审核人</th>
+                            <th>复核人</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="compliance-table">
+                        <tr>
+                            <td colspan="9" style="text-align: center;">加载中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/编辑合规检查模态框 -->
+    <div class="modal" id="compliance-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">新增合规检查</h2>
+                <button class="modal-close" onclick="hideModal('compliance-modal')">&times;</button>
+            </div>
+            <form id="compliance-form">
+                <input type="hidden" id="compliance-id">
+                <div class="form-group">
+                    <label>检查标题 *</label>
+                    <input type="text" id="compliance-title" required>
+                </div>
+                <div class="form-group">
+                    <label>检查类型 *</label>
+                    <select id="compliance-type" required>
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>提交部门 *</label>
+                    <select id="submit-department" required>
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>经办人</label>
+                    <select id="submit-user">
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>检查描述</label>
+                    <textarea id="compliance-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>检查日期</label>
+                    <input type="date" id="check-date">
+                </div>
+                <div class="form-group">
+                    <label>检查结果</label>
+                    <textarea id="check-result" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="compliance-status">
+                        <option value="pending">待检查</option>
+                        <option value="completed">已完成</option>
+                        <option value="failed">未通过</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>审核人</label>
+                    <select id="assigned-to">
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>复核人</label>
+                    <select id="reviewer">
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('compliance-modal')">取消</button>
+                    <button type="submit" class="btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 导入Excel模态框 -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>导入Excel数据</h2>
+                <button class="modal-close" onclick="hideModal('import-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>选择Excel文件 *</label>
+                    <input type="file" id="excel-file" accept=".xlsx,.xls" required>
+                    <small style="color: var(--text-light); display: block; margin-top: 5px;">
+                        支持格式：.xlsx, .xls（最大10MB）
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>导入模板</label>
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; font-size: 14px; margin-bottom: 10px;">
+                        <p style="margin-bottom: 10px;"><strong>下载标准模板：</strong></p>
+                        <button type="button" class="btn btn-primary" onclick="downloadTemplate()" style="margin-right: 10px;">
+                            <i class="fa-solid fa-download"></i> 下载Excel模板
+                        </button>
+                        <small style="color: var(--text-light); display: block; margin-top: 10px;">
+                            模板包含标准格式和示例数据，请按照模板格式填写数据
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>导入说明</label>
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; font-size: 14px;">
+                        <p><strong>Excel格式要求：</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>必须包含"合规审核"字样的Sheet页</li>
+                            <li>第一行为表头行（包含类型、标题等关键字）</li>
+                            <li>数据列顺序：标题、类型、提交部门、经办人、检查日期、检查结果、状态、审核人、复核人、描述</li>
+                            <li>标题和类型为必填项</li>
+                            <li>系统会自动跳过空行</li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="import-progress" style="display: none; margin-top: 15px;">
+                    <div style="background: #e9ecef; border-radius: 5px; overflow: hidden;">
+                        <div id="progress-bar" style="width: 0%; height: 20px; background: #4CAF50; transition: width 0.3s;"></div>
+                    </div>
+                    <p id="progress-text" style="text-align: center; margin-top: 5px;">正在导入...</p>
+                </div>
+                <div id="import-result" style="display: none; margin-top: 15px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideModal('import-modal')">取消</button>
+                <button type="button" class="btn" onclick="importExcel()">开始导入</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/common.js"></script>
+    <script>
+        let currentPage = 1;
+        const pageSize = 10;
+        let complianceTypes = [];
+        let departments = [];
+        let users = [];
+
+        // 页面加载检查
+        if (!checkAuth()) {
+            // 未登录，跳转到登录页
+        } else {
+            // 已登录，加载数据
+            loadComplianceTypes();
+            loadDepartments();
+            loadUsers();
+            loadComplianceChecks();
+            initYearFilter();
+            loadSummaryData();
+            setUserProfile();
+            generateSidebarNav();
+        }
+        
+        // 初始化年份筛选器
+        function initYearFilter() {
+            const yearFilter = document.getElementById('summary-year-filter');
+            const currentYear = new Date().getFullYear();
+            // 生成最近5年的选项
+            for (let i = 0; i < 5; i++) {
+                const year = currentYear - i;
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year + '年';
+                yearFilter.appendChild(option);
+            }
+            // 默认选择当前年份
+            yearFilter.value = currentYear;
+        }
+        
+        // 加载统计数据
+        async function loadSummaryData() {
+            try {
+                const year = document.getElementById('summary-year-filter').value;
+                const url = year ? `/compliance/stats/summary?year=${year}` : '/compliance/stats/summary';
+                const response = await apiGet(url);
+                if (response.success) {
+                    renderSummaryData(response.data);
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+            }
+        }
+        
+        // 渲染统计数据
+        function renderSummaryData(data) {
+            // 更新总数
+            document.getElementById('total-count').textContent = data.total || 0;
+            
+            // 更新状态统计
+            if (data.statusStats) {
+                const pending = data.statusStats.find(s => s.status === 'pending');
+                const completed = data.statusStats.find(s => s.status === 'completed');
+                const failed = data.statusStats.find(s => s.status === 'failed');
+                
+                document.getElementById('pending-count').textContent = pending ? pending.count : 0;
+                document.getElementById('completed-count').textContent = completed ? completed.count : 0;
+                document.getElementById('failed-count').textContent = failed ? failed.count : 0;
+            }
+            
+            // 渲染类型统计
+            const typeStatsContainer = document.getElementById('type-stats');
+            if (data.typeStats && data.typeStats.length > 0) {
+                typeStatsContainer.innerHTML = data.typeStats.map(stat => `
+                    <div class="stat-item">
+                        <span class="stat-label">${stat.type}</span>
+                        <span class="stat-value">${stat.count}<span class="stat-percentage">(${stat.percentage}%)</span></span>
+                    </div>
+                `).join('');
+            } else {
+                typeStatsContainer.innerHTML = '<div class="stat-item"><span class="stat-label">暂无数据</span></div>';
+            }
+            
+            // 渲染部门统计
+            renderDepartmentStats(data.departmentStats);
+        }
+        
+        // 渲染部门统计数据
+        let allDepartmentStats = [];
+        function renderDepartmentStats(departmentStats) {
+            allDepartmentStats = departmentStats || [];
+            filterAndRenderDepartments();
+        }
+        
+        // 过滤和渲染部门数据
+        function filterAndRenderDepartments() {
+            const searchTerm = document.getElementById('dept-search').value.toLowerCase();
+            const filteredStats = allDepartmentStats.filter(stat =>
+                stat.department.toLowerCase().includes(searchTerm)
+            );
+            
+            const departmentStatsContainer = document.getElementById('department-stats');
+            if (filteredStats.length > 0) {
+                departmentStatsContainer.innerHTML = filteredStats.map(stat => `
+                    <div class="stat-item">
+                        <span class="stat-label">${stat.department}</span>
+                        <span class="stat-value">${stat.count}<span class="stat-percentage">(${stat.percentage}%)</span></span>
+                    </div>
+                `).join('');
+            } else {
+                departmentStatsContainer.innerHTML = '<div class="stat-item"><span class="stat-label">暂无数据</span></div>';
+            }
+            
+            // 更新显示数量
+            document.getElementById('dept-showing').textContent = `显示 ${filteredStats.length} 个部门`;
+        }
+        
+        // 部门搜索事件
+        document.getElementById('dept-search').addEventListener('input', filterAndRenderDepartments);
+
+        // 加载合规类型
+        async function loadComplianceTypes() {
+            try {
+                const response = await apiGet('/admin/compliance-types');
+                if (response.success) {
+                    complianceTypes = response.data.filter(t => t.is_active);
+                    updateTypeFilter();
+                    updateTypeSelect();
+                }
+            } catch (error) {
+                console.error('加载合规类型失败:', error);
+            }
+        }
+
+        // 加载部门
+        async function loadDepartments() {
+            try {
+                const response = await apiGet('/admin/departments');
+                if (response.success) {
+                    departments = response.data.filter(d => d.is_active);
+                    updateDepartmentSelect();
+                }
+            } catch (error) {
+                console.error('加载部门失败:', error);
+            }
+        }
+
+        // 加载用户
+        async function loadUsers() {
+            try {
+                const response = await apiGet('/admin/users');
+                if (response.success) {
+                    users = response.data;
+                    updateUserSelect();
+                }
+            } catch (error) {
+                console.error('加载用户失败:', error);
+            }
+        }
+
+        // 更新类型筛选器
+        function updateTypeFilter() {
+            const typeFilter = document.getElementById('type-filter');
+            const currentValue = typeFilter.value;
+            typeFilter.innerHTML = '<option value="">全部类型</option>' +
+                complianceTypes.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+            if (complianceTypes.some(t => t.name === currentValue)) {
+                typeFilter.value = currentValue;
+            }
+        }
+
+        // 更新类型选择框
+        function updateTypeSelect() {
+            const typeSelect = document.getElementById('compliance-type');
+            typeSelect.innerHTML = '<option value="">请选择</option>' +
+                complianceTypes.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+        }
+
+        // 更新部门选择框
+        function updateDepartmentSelect() {
+            const deptSelect = document.getElementById('submit-department');
+            deptSelect.innerHTML = '<option value="">请选择</option>' +
+                departments.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
+        }
+
+        // 更新用户选择框
+        function updateUserSelect() {
+            const userSelect = document.getElementById('submit-user');
+            userSelect.innerHTML = '<option value="">请选择</option>' +
+                users.map(u => `<option value="${u.id}">${u.real_name}</option>`).join('');
+            
+            const assignedToSelect = document.getElementById('assigned-to');
+            assignedToSelect.innerHTML = '<option value="">请选择</option>' +
+                users.map(u => `<option value="${u.id}">${u.real_name}</option>`).join('');
+            
+            const reviewerSelect = document.getElementById('reviewer');
+            reviewerSelect.innerHTML = '<option value="">请选择</option>' +
+                users.map(u => `<option value="${u.id}">${u.real_name}</option>`).join('');
+        }
+
+        // 加载合规检查列表
+        async function loadComplianceChecks() {
+            const status = document.getElementById('status-filter').value;
+            const type = document.getElementById('type-filter').value;
+            
+            let url = `/compliance?page=${currentPage}&limit=${pageSize}`;
+            if (status) url += `&status=${status}`;
+            if (type) url += `&type=${encodeURIComponent(type)}`;
+
+            try {
+                const response = await apiGet(url);
+                if (response.success) {
+                    renderComplianceTable(response.data.checks);
+                    renderPagination(response.data.pagination);
+                    // 刷新统计数据
+                    loadSummaryData();
+                } else {
+                    // API 返回失败
+                    const tbody = document.getElementById('compliance-table');
+                    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #ff6b6b;">加载失败: ' + (response.message || '未知错误') + '</td></tr>';
+                }
+            } catch (error) {
+                console.error('加载合规检查列表失败:', error);
+                // 网络错误或其他异常
+                const tbody = document.getElementById('compliance-table');
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #ff6b6b;">加载失败: ' + (error.message || '网络错误') + '</td></tr>';
+            }
+        }
+
+        // 渲染合规检查表格
+        function renderComplianceTable(checks) {
+            const tbody = document.getElementById('compliance-table');
+            if (!checks || checks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">暂无合规检查数据</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = checks.map(check => `
+                <tr>
+                    <td>${check.title || '-'}</td>
+                    <td>${check.type || '-'}</td>
+                    <td>${check.submit_department || '-'}</td>
+                    <td>${check.submit_user_name || '-'}</td>
+                    <td>${formatDate(check.check_date)}</td>
+                    <td>${check.result || '-'}</td>
+                    <td><span class="status ${getStatusClass(check.status)}">${getStatusText(check.status)}</span></td>
+                    <td>${check.assigned_to_name || '-'}</td>
+                    <td>${check.reviewer_name || '-'}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="editCompliance(${check.id})" style="padding: 5px 10px; font-size: 12px;">
+                            <i class="fa-solid fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteCompliance(${check.id})" style="padding: 5px 10px; font-size: 12px;">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 渲染分页
+        function renderPagination(pagination) {
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+            paginationDiv.appendChild(createPagination(pagination, (page) => {
+                currentPage = page;
+                loadComplianceChecks();
+            }));
+        }
+
+        // 显示新增模态框
+        function showAddModal() {
+            document.getElementById('modal-title').textContent = '新增合规检查';
+            document.getElementById('compliance-form').reset();
+            document.getElementById('compliance-id').value = '';
+            showModal('compliance-modal');
+        }
+
+        // 编辑合规检查
+        async function editCompliance(id) {
+            try {
+                const response = await apiGet(`/compliance/${id}`);
+                if (response.success) {
+                    const check = response.data;
+                    document.getElementById('modal-title').textContent = '编辑合规检查';
+                    document.getElementById('compliance-id').value = check.id;
+                    document.getElementById('compliance-title').value = check.title;
+                    document.getElementById('compliance-type').value = check.type;
+                    document.getElementById('submit-department').value = check.submit_department || '';
+                    document.getElementById('submit-user').value = check.submit_user || '';
+                    document.getElementById('compliance-description').value = check.description || '';
+                    document.getElementById('check-date').value = check.check_date || '';
+                    document.getElementById('check-result').value = check.result || '';
+                    document.getElementById('compliance-status').value = check.status;
+                    document.getElementById('assigned-to').value = check.assigned_to || '';
+                    document.getElementById('reviewer').value = check.reviewer || '';
+                    showModal('compliance-modal');
+                }
+            } catch (error) {
+                console.error('获取合规检查详情失败:', error);
+            }
+        }
+
+        // 删除合规检查
+        async function deleteCompliance(id) {
+            if (!confirm('确定要删除这个合规检查吗？')) {
+                return;
+            }
+
+            try {
+                const response = await apiDelete(`/compliance/${id}`);
+                if (response.success) {
+                    showAlert('合规检查删除成功', 'success');
+                    loadComplianceChecks();
+                } else {
+                    showAlert(response.message, 'error');
+                }
+            } catch (error) {
+                console.error('删除合规检查失败:', error);
+                showAlert('删除失败', 'error');
+            }
+        }
+
+        // 表单提交
+        document.getElementById('compliance-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('compliance-id').value;
+            const data = {
+                title: document.getElementById('compliance-title').value,
+                type: document.getElementById('compliance-type').value,
+                submit_department: document.getElementById('submit-department').value,
+                submit_user: document.getElementById('submit-user').value || null,
+                description: document.getElementById('compliance-description').value,
+                check_date: document.getElementById('check-date').value || null,
+                result: document.getElementById('check-result').value,
+                status: document.getElementById('compliance-status').value,
+                assigned_to: document.getElementById('assigned-to').value || null,
+                reviewer: document.getElementById('reviewer').value || null,
+                created_by: getUser().id
+            };
+
+            try {
+                let response;
+                if (id) {
+                    response = await apiPut(`/compliance/${id}`, data);
+                } else {
+                    response = await apiPost('/compliance', data);
+                }
+
+                if (response.success) {
+                    showAlert(id ? '合规检查更新成功' : '合规检查创建成功', 'success');
+                    hideModal('compliance-modal');
+                    loadComplianceChecks();
+                } else {
+                    showAlert(response.message, 'error');
+                }
+            } catch (error) {
+                console.error('保存合规检查失败:', error);
+                showAlert('保存失败', 'error');
+            }
+        });
+
+        // 搜索和筛选
+        document.getElementById('search-input').addEventListener('input', debounce(loadComplianceChecks, 500));
+        document.getElementById('status-filter').addEventListener('change', loadComplianceChecks);
+
+        // 下载Excel模板
+        function downloadTemplate() {
+            const templateUrl = '/templates/compliance_import_template.xlsx';
+            const link = document.createElement('a');
+            link.href = templateUrl;
+            link.download = '合规检查导入模板.xlsx';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showAlert('模板下载已开始', 'success');
+        }
+        document.getElementById('type-filter').addEventListener('change', loadComplianceChecks);
+
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 显示导入模态框
+        function showImportModal() {
+            document.getElementById('excel-file').value = '';
+            document.getElementById('import-progress').style.display = 'none';
+            document.getElementById('import-result').style.display = 'none';
+            showModal('import-modal');
+        }
+
+        // 导入Excel数据
+        async function importExcel() {
+            const fileInput = document.getElementById('excel-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('请选择要导入的Excel文件', 'error');
+                return;
+            }
+
+            // 验证文件类型
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext !== 'xlsx' && ext !== 'xls') {
+                showAlert('只支持Excel文件格式(.xlsx, .xls)', 'error');
+                return;
+            }
+
+            // 验证文件大小（10MB）
+            if (file.size > 10 * 1024 * 1024) {
+                showAlert('文件大小不能超过10MB', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // 显示进度
+            document.getElementById('import-progress').style.display = 'block';
+            document.getElementById('import-result').style.display = 'none';
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            // 模拟进度条
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 90) {
+                    progress += 10;
+                    progressBar.style.width = progress + '%';
+                    progressText.textContent = `正在导入... ${progress}%`;
+                }
+            }, 200);
+
+            try {
+                const response = await fetch('/api/compliance/import', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                progressText.textContent = '导入完成！';
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 显示导入结果
+                    const resultDiv = document.getElementById('import-result');
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px;">
+                            <h4 style="margin: 0 0 10px 0;"><i class="fa-solid fa-check-circle"></i> 导入成功</h4>
+                            <p style="margin: 5px 0;">成功导入: ${result.data.successCount} 条数据</p>
+                            <p style="margin: 5px 0;">失败: ${result.data.errorCount} 条数据</p>
+                            <p style="margin: 5px 0;">总计: ${result.data.total} 条数据</p>
+                            ${result.data.errors && result.data.errors.length > 0 ? `
+                                <div style="margin-top: 10px;">
+                                    <p style="margin: 5px 0;"><strong>错误详情:</strong></p>
+                                    <ul style="margin: 5px 0; padding-left: 20px;">
+                                        ${result.data.errors.slice(0, 5).map(err => `<li>${err}</li>`).join('')}
+                                        ${result.data.errors.length > 5 ? `<li>...还有 ${result.data.errors.length - 5} 个错误</li>` : ''}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    // 刷新列表
+                    loadComplianceChecks();
+                    
+                    // 3秒后自动关闭
+                    setTimeout(() => {
+                        hideModal('import-modal');
+                    }, 3000);
+                } else {
+                    // 显示错误
+                    const resultDiv = document.getElementById('import-result');
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px;">
+                            <h4 style="margin: 0 0 10px 0;"><i class="fa-solid fa-times-circle"></i> 导入失败</h4>
+                            <p style="margin: 0;">${result.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                clearInterval(progressInterval);
+                console.error('导入失败:', error);
+                
+                const resultDiv = document.getElementById('import-result');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px;">
+                        <h4 style="margin: 0 0 10px 0;"><i class="fa-solid fa-times-circle"></i> 导入失败</h4>
+                        <p style="margin: 0;">${error.message || '网络错误，请稍后重试'}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

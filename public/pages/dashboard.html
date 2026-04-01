@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>法务合规管理系统 - 工作台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="dashboard">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>风险合规管理平台</span>
+            </div>
+            <a href="/pages/dashboard.html" class="nav-item active">
+                <i class="fa-solid fa-chart-line"></i> 工作台
+            </a>
+            <a href="/pages/contracts.html" class="nav-item">
+                <i class="fa-solid fa-file-contract"></i> 合同管理
+            </a>
+            <a href="/pages/regulations.html" class="nav-item">
+                <i class="fa-solid fa-book"></i> 制度管理
+            </a>
+            <a href="/pages/compliance.html" class="nav-item">
+                <i class="fa-solid fa-clipboard-check"></i> 合规管理
+            </a>
+            <a href="/pages/risks.html" class="nav-item">
+                <i class="fa-solid fa-triangle-exclamation"></i> 风险管理
+            </a>
+            
+            <div class="user-profile">
+                <div class="avatar">法</div>
+                <div>
+                    <div class="font-bold">用户</div>
+                    <div class="text-sm" style="opacity: 0.7;">部门</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容 -->
+        <div class="main-content">
+            <div class="header">
+                <div>
+                    <h1>法务合规概览</h1>
+                    <p style="color: var(--text-light); margin-top: 5px;" id="current-date"></p>
+                </div>
+                <div>
+                    <button class="btn" onclick="window.location.reload()">
+                        <i class="fa-solid fa-refresh"></i> 刷新数据
+                    </button>
+                </div>
+            </div>
+
+            <!-- 年份筛选 -->
+            <div style="margin-bottom: 20px;">
+                <label style="margin-right: 10px; font-weight: bold;">选择年份：</label>
+                <select id="year-select" onchange="loadComplianceOverview()" style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    <option value="2026">2026年</option>
+                    <option value="2025">2025年</option>
+                    <option value="2024">2024年</option>
+                </select>
+            </div>
+
+            <!-- 法务合规概览统计卡片 -->
+            <div class="kpi-cards">
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>本年度合同总数</h3>
+                        <p id="total-contracts">-</p>
+                    </div>
+                    <div class="kpi-icon bg-blue"><i class="fa-solid fa-file-contract"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>本年度制度总数</h3>
+                        <p id="total-regulations">-</p>
+                    </div>
+                    <div class="kpi-icon bg-green"><i class="fa-solid fa-book"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>风险事项合计</h3>
+                        <p id="total-risks">-</p>
+                    </div>
+                    <div class="kpi-icon bg-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>合规检查总数</h3>
+                        <p id="total-compliance-checks">-</p>
+                    </div>
+                    <div class="kpi-icon bg-purple"><i class="fa-solid fa-clipboard-check"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>部门重点任务完成率</h3>
+                        <p id="key-work-rate">-</p>
+                    </div>
+                    <div class="kpi-icon bg-orange"><i class="fa-solid fa-chart-pie"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>部门督办事项完成率</h3>
+                        <p id="supervision-rate">-</p>
+                    </div>
+                    <div class="kpi-icon bg-teal"><i class="fa-solid fa-tasks"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>部门整改事项完成率</h3>
+                        <p id="rectification-rate">-</p>
+                    </div>
+                    <div class="kpi-icon bg-yellow"><i class="fa-solid fa-list-check"></i></div>
+                </div>
+            </div>
+
+            <!-- 图表区域 -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">近半年合同签署与风险趋势</div>
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">合同类型分布</div>
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 底部列表 -->
+            <div class="bottom-grid">
+                <div class="chart-card">
+                    <div class="chart-header">最新部门工作</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>任务名称</th>
+                                <th>工作类型</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="works-table">
+                            <tr>
+                                <td colspan="3" style="text-align: center;">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">最新制度发布</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>制度名称</th>
+                                <th>生效日期</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="regulations-table">
+                            <tr>
+                                <td colspan="3" style="text-align: center;">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/common.js"></script>
+    <script>
+        // 页面加载检查
+        if (!checkAuth()) {
+            // 未登录，跳转到登录页
+        } else {
+            // 已登录，加载数据
+            loadDashboardData();
+            setUserProfile();
+            generateSidebarNav();
+            
+            // 设置当前日期
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+
+        // 加载法务合规概览统计
+        async function loadComplianceOverview() {
+            const year = document.getElementById('year-select').value;
+            
+            try {
+                const response = await apiGet(`/dashboard/compliance-overview?year=${year}`);
+                if (response.success) {
+                    const data = response.data;
+                    
+                    document.getElementById('total-contracts').textContent = data.totalContracts;
+                    document.getElementById('total-regulations').textContent = data.totalRegulations;
+                    document.getElementById('total-risks').textContent = data.totalRisks;
+                    document.getElementById('total-compliance-checks').textContent = data.totalComplianceChecks;
+                    document.getElementById('key-work-rate').textContent = data.keyWorkRate + '%';
+                    document.getElementById('supervision-rate').textContent = data.supervisionRate + '%';
+                    document.getElementById('rectification-rate').textContent = data.rectificationRate + '%';
+                }
+            } catch (error) {
+                console.error('加载法务合规概览统计失败:', error);
+            }
+        }
+
+        // 加载仪表板数据
+        async function loadDashboardData() {
+            try {
+                // 加载法务合规概览统计
+                loadComplianceOverview();
+
+                // 加载趋势数据
+                const trend = await apiGet('/dashboard/contract-trend');
+                if (trend.success) {
+                    initTrendChart(trend.data);
+                }
+
+                // 加载合同分布数据
+                const distribution = await apiGet('/dashboard/contract-distribution');
+                if (distribution.success) {
+                    initPieChart(distribution.data);
+                }
+
+                // 加载最新部门工作
+                const works = await apiGet('/dashboard/latest-works');
+                if (works.success) {
+                    renderWorksTable(works.data);
+                }
+
+                // 加载最新制度
+                const regulations = await apiGet('/dashboard/latest-regulations');
+                if (regulations.success) {
+                    renderRegulationsTable(regulations.data);
+                }
+
+            } catch (error) {
+                console.error('加载仪表板数据失败:', error);
+            }
+        }
+
+        // 初始化趋势图
+        function initTrendChart(data) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.months,
+                    datasets: [
+                        {
+                            label: '合同签署量',
+                            data: data.contractCounts,
+                            backgroundColor: 'rgba(26, 60, 110, 0.6)',
+                            borderColor: 'rgba(26, 60, 110, 1)',
+                            borderWidth: 1,
+                            order: 2
+                        },
+                        {
+                            label: '风险预警数',
+                            data: data.riskCounts,
+                            type: 'line',
+                            borderColor: '#e53e3e',
+                            tension: 0.4,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // 初始化饼图
+        function initPieChart(data) {
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: [
+                            '#3182ce',
+                            '#38b2ac',
+                            '#48bb78',
+                            '#ed8936',
+                            '#e2e8f0'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // 渲染部门工作表格
+        function renderWorksTable(works) {
+            const tbody = document.getElementById('works-table');
+            if (works.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">暂无部门工作</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = works.map(work => `
+                <tr>
+                    <td>${work.task_name}</td>
+                    <td>${getWorkTypeText(work.work_type)}</td>
+                    <td><span class="status ${getStatusClass(work.progress_status)}">${getProgressStatusText(work.progress_status)}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // 获取工作类型文本
+        function getWorkTypeText(type) {
+            const typeMap = {
+                'key_work': '重点工作',
+                'supervision': '督办事项',
+                'routine': '常态工作',
+                'rectification': '整改清单'
+            };
+            return typeMap[type] || type;
+        }
+
+        // 获取进展状态文本
+        function getProgressStatusText(status) {
+            const statusMap = {
+                'pending': '待处理',
+                'in_progress': '进行中',
+                'completed': '已完成'
+            };
+            return statusMap[status] || status;
+        }
+
+        // 渲染制度表格
+        function renderRegulationsTable(regulations) {
+            const tbody = document.getElementById('regulations-table');
+            if (regulations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">暂无制度</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = regulations.map(reg => `
+                <tr>
+                    <td>${reg.title}</td>
+                    <td>${formatDate(reg.effective_date)}</td>
+                    <td><span class="status ${getStatusClass(reg.status)}">${getStatusText(reg.status)}</span></td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

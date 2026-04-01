@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>法务合规管理系统 - 制度管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="dashboard">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>风险合规管理平台</span>
+            </div>
+            <a href="/pages/dashboard.html" class="nav-item">
+                <i class="fa-solid fa-chart-line"></i> 工作台
+            </a>
+            <a href="/pages/contracts.html" class="nav-item">
+                <i class="fa-solid fa-file-contract"></i> 合同管理
+            </a>
+            <a href="/pages/regulations.html" class="nav-item active">
+                <i class="fa-solid fa-book"></i> 制度管理
+            </a>
+            <a href="/pages/compliance.html" class="nav-item">
+                <i class="fa-solid fa-clipboard-check"></i> 合规管理
+            </a>
+            <a href="/pages/risks.html" class="nav-item">
+                <i class="fa-solid fa-triangle-exclamation"></i> 风险管理
+            </a>
+            
+            <div class="user-profile">
+                <div class="avatar">法</div>
+                <div>
+                    <div class="font-bold">用户</div>
+                    <div class="text-sm" style="opacity: 0.7;">部门</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容 -->
+        <div class="main-content">
+            <div class="header">
+                <div>
+                    <h1>制度管理</h1>
+                    <p style="color: var(--text-light); margin-top: 5px;">管理企业规章制度</p>
+                </div>
+                <div>
+                    <button class="btn" onclick="showAddModal()">
+                        <i class="fa-solid fa-plus"></i> 新增制度
+                    </button>
+                </div>
+            </div>
+
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <input type="text" class="search-box" id="search-input" placeholder="搜索制度...">
+                    <select class="filter-select" id="status-filter">
+                        <option value="">全部状态</option>
+                        <option value="active">已生效</option>
+                        <option value="pending">待审核</option>
+                        <option value="expired">已过期</option>
+                    </select>
+                    <select class="filter-select" id="category-filter">
+                        <option value="">全部分类</option>
+                        <option value="行为规范">行为规范</option>
+                        <option value="采购管理">采购管理</option>
+                        <option value="行政管理">行政管理</option>
+                        <option value="财务管理">财务管理</option>
+                        <option value="人力资源">人力资源</option>
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-secondary" onclick="loadRegulations()">
+                        <i class="fa-solid fa-refresh"></i> 刷新
+                    </button>
+                </div>
+            </div>
+
+            <!-- 制度列表 -->
+            <div class="chart-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>制度名称</th>
+                            <th>分类</th>
+                            <th>版本</th>
+                            <th>生效日期</th>
+                            <th>失效日期</th>
+                            <th>状态</th>
+                            <th>创建人</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="regulations-table">
+                        <tr>
+                            <td colspan="8" style="text-align: center;">加载中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/编辑制度模态框 -->
+    <div class="modal" id="regulation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">新增制度</h2>
+                <button class="modal-close" onclick="hideModal('regulation-modal')">&times;</button>
+            </div>
+            <form id="regulation-form">
+                <input type="hidden" id="regulation-id">
+                <div class="form-group">
+                    <label>制度名称 *</label>
+                    <input type="text" id="regulation-title" required>
+                </div>
+                <div class="form-group">
+                    <label>分类 *</label>
+                    <select id="regulation-category" required>
+                        <option value="">请选择</option>
+                        <option value="行为规范">行为规范</option>
+                        <option value="采购管理">采购管理</option>
+                        <option value="行政管理">行政管理</option>
+                        <option value="财务管理">财务管理</option>
+                        <option value="人力资源">人力资源</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>版本</label>
+                    <input type="text" id="regulation-version">
+                </div>
+                <div class="form-group">
+                    <label>生效日期</label>
+                    <input type="date" id="effective-date">
+                </div>
+                <div class="form-group">
+                    <label>失效日期</label>
+                    <input type="date" id="expiry-date">
+                </div>
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="regulation-status">
+                        <option value="active">已生效</option>
+                        <option value="pending">待审核</option>
+                        <option value="expired">已过期</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>制度内容</label>
+                    <textarea id="regulation-content" rows="5"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('regulation-modal')">取消</button>
+                    <button type="submit" class="btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/common.js"></script>
+    <script>
+        let currentPage = 1;
+        const pageSize = 10;
+
+        // 页面加载检查
+        if (!checkAuth()) {
+            // 未登录，跳转到登录页
+        } else {
+            // 已登录，加载数据
+            loadRegulations();
+            setUserProfile();
+            generateSidebarNav();
+        }
+
+        // 加载制度列表
+        async function loadRegulations() {
+            const status = document.getElementById('status-filter').value;
+            const category = document.getElementById('category-filter').value;
+            
+            let url = `/regulations?page=${currentPage}&limit=${pageSize}`;
+            if (status) url += `&status=${status}`;
+            if (category) url += `&category=${encodeURIComponent(category)}`;
+
+            try {
+                const response = await apiGet(url);
+                if (response.success) {
+                    renderRegulationsTable(response.data.regulations);
+                    renderPagination(response.data.pagination);
+                }
+            } catch (error) {
+                console.error('加载制度列表失败:', error);
+            }
+        }
+
+        // 渲染制度表格
+        function renderRegulationsTable(regulations) {
+            const tbody = document.getElementById('regulations-table');
+            if (regulations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">暂无制度数据</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = regulations.map(reg => `
+                <tr>
+                    <td>${reg.title}</td>
+                    <td>${reg.category}</td>
+                    <td>${reg.version || '-'}</td>
+                    <td>${formatDate(reg.effective_date)}</td>
+                    <td>${formatDate(reg.expiry_date)}</td>
+                    <td><span class="status ${getStatusClass(reg.status)}">${getStatusText(reg.status)}</span></td>
+                    <td>${reg.created_by_name || '-'}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="editRegulation(${reg.id})" style="padding: 5px 10px; font-size: 12px;">
+                            <i class="fa-solid fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteRegulation(${reg.id})" style="padding: 5px 10px; font-size: 12px;">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 渲染分页
+        function renderPagination(pagination) {
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+            paginationDiv.appendChild(createPagination(pagination, (page) => {
+                currentPage = page;
+                loadRegulations();
+            }));
+        }
+
+        // 显示新增模态框
+        function showAddModal() {
+            document.getElementById('modal-title').textContent = '新增制度';
+            document.getElementById('regulation-form').reset();
+            document.getElementById('regulation-id').value = '';
+            showModal('regulation-modal');
+        }
+
+        // 编辑制度
+        async function editRegulation(id) {
+            try {
+                const response = await apiGet(`/regulations/${id}`);
+                if (response.success) {
+                    const reg = response.data;
+                    document.getElementById('modal-title').textContent = '编辑制度';
+                    document.getElementById('regulation-id').value = reg.id;
+                    document.getElementById('regulation-title').value = reg.title;
+                    document.getElementById('regulation-category').value = reg.category;
+                    document.getElementById('regulation-version').value = reg.version || '';
+                    document.getElementById('effective-date').value = reg.effective_date || '';
+                    document.getElementById('expiry-date').value = reg.expiry_date || '';
+                    document.getElementById('regulation-status').value = reg.status;
+                    document.getElementById('regulation-content').value = reg.content || '';
+                    showModal('regulation-modal');
+                }
+            } catch (error) {
+                console.error('获取制度详情失败:', error);
+            }
+        }
+
+        // 删除制度
+        async function deleteRegulation(id) {
+            if (!confirm('确定要删除这个制度吗？')) {
+                return;
+            }
+
+            try {
+                const response = await apiDelete(`/regulations/${id}`);
+                if (response.success) {
+                    showAlert('制度删除成功', 'success');
+                    loadRegulations();
+                } else {
+                    showAlert(response.message, 'error');
+                }
+            } catch (error) {
+                console.error('删除制度失败:', error);
+                showAlert('删除失败', 'error');
+            }
+        }
+
+        // 表单提交
+        document.getElementById('regulation-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('regulation-id').value;
+            const data = {
+                title: document.getElementById('regulation-title').value,
+                category: document.getElementById('regulation-category').value,
+                version: document.getElementById('regulation-version').value,
+                effective_date: document.getElementById('effective-date').value || null,
+                expiry_date: document.getElementById('expiry-date').value || null,
+                status: document.getElementById('regulation-status').value,
+                content: document.getElementById('regulation-content').value,
+                created_by: getUser().id
+            };
+
+            try {
+                let response;
+                if (id) {
+                    response = await apiPut(`/regulations/${id}`, data);
+                } else {
+                    response = await apiPost('/regulations', data);
+                }
+
+                if (response.success) {
+                    showAlert(id ? '制度更新成功' : '制度创建成功', 'success');
+                    hideModal('regulation-modal');
+                    loadRegulations();
+                } else {
+                    showAlert(response.message, 'error');
+                }
+            } catch (error) {
+                console.error('保存制度失败:', error);
+                showAlert('保存失败', 'error');
+            }
+        });
+
+        // 搜索和筛选
+        document.getElementById('search-input').addEventListener('input', debounce(loadRegulations, 500));
+        document.getElementById('status-filter').addEventListener('change', loadRegulations);
+        document.getElementById('category-filter').addEventListener('change', loadRegulations);
+
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+</html>

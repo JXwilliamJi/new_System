@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>法务合规管理系统 - 合同管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="dashboard">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>风险合规管理平台</span>
+            </div>
+            <a href="/pages/dashboard.html" class="nav-item">
+                <i class="fa-solid fa-chart-line"></i> 工作台
+            </a>
+            <a href="/pages/contracts.html" class="nav-item active">
+                <i class="fa-solid fa-file-contract"></i> 合同管理
+            </a>
+            <a href="/pages/regulations.html" class="nav-item">
+                <i class="fa-solid fa-book"></i> 制度管理
+            </a>
+            <a href="/pages/compliance.html" class="nav-item">
+                <i class="fa-solid fa-clipboard-check"></i> 合规管理
+            </a>
+            <a href="/pages/risks.html" class="nav-item">
+                <i class="fa-solid fa-triangle-exclamation"></i> 风险管理
+            </a>
+            
+            <div class="user-profile">
+                <div class="avatar">法</div>
+                <div>
+                    <div class="font-bold">用户</div>
+                    <div class="text-sm" style="opacity: 0.7;">部门</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容 -->
+        <div class="main-content">
+            <div class="header">
+                <div>
+                    <h1>合同管理</h1>
+                    <p style="color: var(--text-light); margin-top: 5px;">管理所有合同信息</p>
+                </div>
+                <div>
+                    <button class="btn" onclick="showAddModal()">
+                        <i class="fa-solid fa-plus"></i> 新增合同
+                    </button>
+                </div>
+            </div>
+
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <input type="text" class="search-box" id="search-input" placeholder="搜索合同...">
+                    <select class="filter-select" id="status-filter">
+                        <option value="">全部状态</option>
+                        <option value="pending">待审核</option>
+                        <option value="active">已生效</option>
+                        <option value="completed">已完成</option>
+                    </select>
+                    <select class="filter-select" id="type-filter">
+                        <option value="">全部类型</option>
+                        <option value="采购合同">采购合同</option>
+                        <option value="销售合同">销售合同</option>
+                        <option value="服务合同">服务合同</option>
+                        <option value="租赁合同">租赁合同</option>
+                        <option value="劳动合同">劳动合同</option>
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-secondary" onclick="loadContracts()">
+                        <i class="fa-solid fa-refresh"></i> 刷新
+                    </button>
+                </div>
+            </div>
+
+            <!-- 合同列表 -->
+            <div class="chart-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>合同编号</th>
+                            <th>合同标题</th>
+                            <th>类型</th>
+                            <th>金额</th>
+                            <th>开始日期</th>
+                            <th>结束日期</th>
+                            <th>状态</th>
+                            <th>风险等级</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contracts-table">
+                        <tr>
+                            <td colspan="9" style="text-align: center;">加载中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/编辑合同模态框 -->
+    <div class="modal" id="contract-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">新增合同</h2>
+                <button class="modal-close" onclick="hideModal('contract-modal')">&times;</button>
+            </div>
+            <form id="contract-form">
+                <input type="hidden" id="contract-id">
+                <div class="form-group">
+                    <label>合同编号 *</label>
+                    <input type="text" id="contract-no" required>
+                </div>
+                <div class="form-group">
+                    <label>合同标题 *</label>
+                    <input type="text" id="contract-title" required>
+                </div>
+                <div class="form-group">
+                    <label>合同类型 *</label>
+                    <select id="contract-type" required>
+                        <option value="">请选择</option>
+                        <option value="采购合同">采购合同</option>
+                        <option value="销售合同">销售合同</option>
+                        <option value="服务合同">服务合同</option>
+                        <option value="租赁合同">租赁合同</option>
+                        <option value="劳动合同">劳动合同</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>甲方</label>
+                    <input type="text" id="party-a">
+                </div>
+                <div class="form-group">
+                    <label>乙方</label>
+                    <input type="text" id="party-b">
+                </div>
+                <div class="form-group">
+                    <label>金额</label>
+                    <input type="number" id="amount" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>开始日期</label>
+                    <input type="date" id="start-date">
+                </div>
+                <div class="form-group">
+                    <label>结束日期</label>
+                    <input type="date" id="end-date">
+                </div>
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="contract-status">
+                        <option value="pending">待审核</option>
+                        <option value="active">已生效</option>
+                        <option value="completed">已完成</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>风险等级</label>
+                    <select id="risk-level">
+                        <option value="low">低风险</option>
+                        <option value="medium">中风险</option>
+                        <option value="high">高风险</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('contract-modal')">取消</button>
+                    <button type="submit" class="btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/common.js"></script>
+    <script>
+        let currentPage = 1;
+        const pageSize = 10;
+
+        // 页面加载检查
+        if (!checkAuth()) {
+            // 未登录，跳转到登录页
+        } else {
+            // 已登录，加载数据
+            loadContracts();
+            setUserProfile();
+            generateSidebarNav();
+        }
+
+        // 加载合同列表
+        async function loadContracts() {
+            const status = document.getElementById('status-filter').value;
+            const type = document.getElementById('type-filter').value;
+            
+            let url = `/contracts?page=${currentPage}&limit=${pageSize}`;
+            if (status) url += `&status=${status}`;
+            if (type) url += `&type=${encodeURIComponent(type)}`;
+
+            try {
+                const response = await apiGet(url);
+                if (response.success) {
+                    renderContractsTable(response.data.contracts);
+                    renderPagination(response.data.pagination);
+                }
+            } catch (error) {
+                console.error('加载合同列表失败:', error);
+            }
+        }
+
+        // 渲染合同表格
+        function renderContractsTable(contracts) {
+            const tbody = document.getElementById('contracts-table');
+            if (contracts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">暂无合同数据</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = contracts.map(contract => `
+                <tr>
+                    <td>${contract.contract_no}</td>
+                    <td>${contract.title}</td>
+                    <td>${contract.type}</td>
+                    <td>${formatAmount(contract.amount)}</td>
+                    <td>${formatDate(contract.start_date)}</td>
+                    <td>${formatDate(contract.end_date)}</td>
+                    <td><span class="status ${getStatusClass(contract.status)}">${getStatusText(contract.status)}</span></td>
+                    <td><span class="status ${getStatusClass(contract.risk_level)}">${getStatusText(contract.risk_level)}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="editContract(${contract.id})" style="padding: 5px 10px; font-size: 12px;">
+                            <i class="fa-solid fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteContract(${contract.id})" style="padding: 5px 10px; font-size: 12px;">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 渲染分页
+        function renderPagination(pagination) {
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+            paginationDiv.appendChild(createPagination(pagination, (page) => {
+                currentPage = page;
+                loadContracts();
+            }));
+        }
+
+        // 显示新增模态框
+        function showAddModal() {
+            document.getElementById('modal-title').textContent = '新增合同';
+            document.getElementById('contract-form').reset();
+            document.getElementById('contract-id').value = '';
+            showModal('contract-modal');
+        }
+
+        // 编辑合同
+        async function editContract(id) {
+            try {
+                const response = await apiGet(`/contracts/${id}`);
+                if (response.success) {
+                    const contract = response.data;
+                    document.getElementById('modal-title').textContent = '编辑合同';
+                    document.getElementById('contract-id').value = contract.id;
+                    document.getElementById('contract-no').value = contract.contract_no;
+                    document.getElementById('contract-title').value = contract.title;
+                    document.getElementById('contract-type').value = contract.type;
+                    document.getElementById('party-a').value = contract.party_a || '';
+                    document.getElementById('party-b').value = contract.party_b || '';
+                    document.getElementById('amount').value = contract.amount || '';
+                    document.getElementById('start-date').value = contract.start_date || '';
+                    document.getElementById('end-date').value = contract.end_date || '';
+                    document.getElementById('contract-status').value = contract.status;
+                    document.getElementById('risk-level').value = contract.risk_level;
+                    showModal('contract-modal');
+                }
+            } catch (error) {
+                console.error('获取合同详情失败:', error);
+            }
+        }
+
+        // 删除合同
+        async function deleteContract(id) {
+            if (!confirm('确定要删除这个合同吗？')) {
+                return;
+            }
+
+            try {
+                const response = await apiDelete(`/contracts/${id}`);
+                if (response.success) {
+                    showAlert('合同删除成功', 'success');
+                    loadContracts();
+                } else {
+                    showAlert(response.message, 'error');
+                }
+            } catch (error) {
+                console.error('删除合同失败:', error);
+                showAlert('删除失败', 'error');
+            }
+        }
+
+        // 表单提交
+        document.getElementById('contract-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('contract-id').value;
+            const data = {
+                contract_no: document.getElementById('contract-no').value,
+                title: document.getElementById('contract-title').value,
+                type: document.getElementById('contract-type').value,
+                party_a: document.getElementById('party-a').value,
+                party_b: document.getElementById('party-b').value,
+                amount: document.getElementById('amount').value ? parseFloat(document.getElementById('amount').value) : null,
+                start_date: document.getElementById('start-date').value || null,
+                end_date: document.getElementById('end-date').value || null,
+                status: document.getElementById('contract-status').value,
+                risk_level: document.getElementById('risk-level').value,
+                created_by: getUser().id
+            };
+
+            try {
+                let response;
+                if (id) {
+                    response = await apiPut(`/contracts/${id}`, data);
+                } else {
+                    response = await apiPost('/contracts', data);
+                }
+
+                if (response.success) {
+                    showAlert(id ? '合同更新成功' : '合同创建成功', 'success');
+                    hideModal('contract-modal');
+                    loadContracts();
+                } else {
+                    showAlert(response.message, 'error');
+                }
+            } catch (error) {
+                console.error('保存合同失败:', error);
+                showAlert('保存失败', 'error');
+            }
+        });
+
+        // 搜索和筛选
+        document.getElementById('search-input').addEventListener('input', debounce(loadContracts, 500));
+        document.getElementById('status-filter').addEventListener('change', loadContracts);
+        document.getElementById('type-filter').addEventListener('change', loadContracts);
+
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+</html>
