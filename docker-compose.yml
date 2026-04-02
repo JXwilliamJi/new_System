@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  legal-compliance-system:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: legal-compliance-system
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      # 数据库文件持久化
+      - ./database:/app/database
+      # 上传文件持久化
+      - ./uploads:/app/uploads
+    networks:
+      - legal-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+
+networks:
+  legal-network:
+    driver: bridge

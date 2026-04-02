@@ -3,9 +3,23 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// 获取本机IP地址
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return '127.0.0.1';
+}
 
 // 初始化数据库
 require('./database/init');
@@ -82,8 +96,12 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 法务合规管理平台服务器运行在 http://localhost:${PORT}`);
-  console.log(`📊 API 文档: http://localhost:${PORT}/api`);
+  const localIP = getLocalIP();
+  console.log(`🚀 法务合规管理平台服务器已启动`);
+  console.log(`📍 本地访问: http://localhost:${PORT}`);
+  console.log(`🌐 局域网访问: http://${localIP}:${PORT}`);
+  console.log(`📊 API 文档: http://${localIP}:${PORT}/api`);
+  console.log(`📋 API 列表: http://${localIP}:${PORT}/api`);
 });
 
 module.exports = app;
