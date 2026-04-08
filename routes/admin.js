@@ -2,35 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-const JWT_SECRET = process.env.JWT_SECRET || 'legal-compliance-secret-key-2026';
-
-// 中间件：验证JWT令牌
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: '未提供认证令牌' });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: '认证失败' });
-    }
-    req.user = user;
-    next();
-  });
-};
-
-// 中间件：检查是否为管理员
-const requireAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ error: '需要管理员权限' });
-  }
-  next();
-};
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // 获取所有模块配置
 router.get('/modules', authenticateToken, requireAdmin, (req, res) => {

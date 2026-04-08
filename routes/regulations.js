@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
+const { authenticateToken } = require('../middleware/auth');
+
+router.use(authenticateToken);
 
 // 获取所有制度
 router.get('/', (req, res) => {

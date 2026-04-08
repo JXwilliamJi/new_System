@@ -155,7 +155,7 @@ router.get('/profile', (req, res) => {
     console.error('获取用户信息错误:', error);
     res.status(401).json({
       success: false,
-      message: '认证失败'
+      message: '认证令牌无效或已过期，请重新登录'
     });
   }
 });
@@ -208,6 +208,12 @@ router.put('/password', (req, res) => {
 
   } catch (error) {
     console.error('修改密码错误:', error);
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: '认证令牌无效或已过期，请重新登录'
+      });
+    }
     res.status(500).json({
       success: false,
       message: '服务器错误'
@@ -247,6 +253,12 @@ router.get('/modules', (req, res) => {
 
   } catch (error) {
     console.error('获取模块配置错误:', error);
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: '认证令牌无效或已过期，请重新登录'
+      });
+    }
     res.status(500).json({
       success: false,
       message: '服务器错误'

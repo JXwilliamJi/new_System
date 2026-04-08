@@ -5,6 +5,9 @@ const multer = require('multer');
 const XLSX = require('xlsx');
 const path = require('path');
 const fs = require('fs');
+const { authenticateToken } = require('../middleware/auth');
+
+router.use(authenticateToken);
 
 // 配置文件上传
 const upload = multer({
