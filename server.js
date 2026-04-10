@@ -79,13 +79,13 @@ app.get('/pages/:page', (req, res) => {
 
 // 错误处理中间件
 app.use((err, req, res, next) => {
-  console.error(err.stack);
   if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
     return res.status(401).json({
       success: false,
       message: '认证令牌无效或已过期，请重新登录'
     });
   }
+  console.error(err.stack);
   res.status(500).json({ 
     success: false, 
     message: '服务器内部错误',

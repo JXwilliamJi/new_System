@@ -7,12 +7,73 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#1a3c6e">
     <title>法务合规管理平台 - 合同管理</title>
-    <!-- 网站图标 -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/mobile-responsive.css">
+    <style>
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+        .table-container table {
+            min-width: 3200px;
+            white-space: nowrap;
+        }
+        .import-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .import-btn:hover {
+            background-color: #218838;
+        }
+        .performance-import-btn {
+            background-color: #17a2b8;
+        }
+        .performance-import-btn:hover {
+            background-color: #138496;
+        }
+        .import-modal .modal-content {
+            max-width: 500px;
+        }
+        .file-input-wrapper {
+            margin: 20px 0;
+        }
+        .file-input-wrapper input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+        }
+        .import-progress {
+            margin-top: 15px;
+            display: none;
+        }
+        .import-result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .import-result.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .import-result.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .grade-excellent { background-color: #28a745; color: white; padding: 3px 8px; border-radius: 3px; }
+        .grade-good { background-color: #17a2b8; color: white; padding: 3px 8px; border-radius: 3px; }
+        .grade-medium { background-color: #ffc107; color: #333; padding: 3px 8px; border-radius: 3px; }
+        .grade-poor { background-color: #dc3545; color: white; padding: 3px 8px; border-radius: 3px; }
+    </style>
 </head>
 <body>
     <div id="dashboard">
@@ -55,6 +116,12 @@
                     <p style="color: var(--text-light); margin-top: 5px;">管理所有合同信息</p>
                 </div>
                 <div>
+                    <button class="import-btn" onclick="showImportModal()">
+                        <i class="fa-solid fa-file-import"></i> 导入合同
+                    </button>
+                    <button class="import-btn performance-import-btn" onclick="showPerformanceImportModal()">
+                        <i class="fa-solid fa-chart-line"></i> 导入履行情况
+                    </button>
                     <button class="btn" onclick="showAddModal()">
                         <i class="fa-solid fa-plus"></i> 新增合同
                     </button>
@@ -67,9 +134,16 @@
                     <input type="text" class="search-box" id="search-input" placeholder="搜索合同...">
                     <select class="filter-select" id="status-filter">
                         <option value="">全部状态</option>
-                        <option value="pending">待审核</option>
-                        <option value="active">已生效</option>
-                        <option value="completed">已完成</option>
+                        <option value="正常">正常</option>
+                        <option value="已变更">已变更</option>
+                    </select>
+                    <select class="filter-select" id="stage-filter">
+                        <option value="">全部阶段</option>
+                        <option value="履行中">履行中</option>
+                        <option value="履行期结束未验收">履行期结束未验收</option>
+                        <option value="履行期结束已验收">履行期结束已验收</option>
+                        <option value="维保期进行中">维保期进行中</option>
+                        <option value="已结束">已结束</option>
                     </select>
                     <select class="filter-select" id="type-filter">
                         <option value="">全部类型</option>
@@ -89,94 +163,219 @@
 
             <!-- 合同列表 -->
             <div class="chart-card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>合同编号</th>
-                            <th>合同标题</th>
-                            <th>类型</th>
-                            <th>金额</th>
-                            <th>开始日期</th>
-                            <th>结束日期</th>
-                            <th>状态</th>
-                            <th>风险等级</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="contracts-table">
-                        <tr>
-                            <td colspan="9" style="text-align: center;">加载中...</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>合同履行情况</th>
+                                <th>经办人</th>
+                                <th>经办部门</th>
+                                <th>合同状态</th>
+                                <th>合同当前阶段</th>
+                                <th>合同名称</th>
+                                <th>采购名称</th>
+                                <th>合同分类</th>
+                                <th>合同编号</th>
+                                <th>合同起始日</th>
+                                <th>合同到期日</th>
+                                <th>合同总金额</th>
+                                <th>采购申请总体预算金额</th>
+                                <th>已签订合同金额</th>
+                                <th>验收截止日期</th>
+                                <th>维保期</th>
+                                <th>合同标的内容</th>
+                                <th>合同签署日期</th>
+                                <th>呈报领导</th>
+                                <th>合同请示完成日期</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contracts-table">
+                            <tr>
+                                <td colspan="21" style="text-align: center;">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
                 <div id="pagination"></div>
             </div>
         </div>
     </div>
 
+    <!-- 合同Excel导入模态框 -->
+    <div class="modal import-modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>导入合同数据</h2>
+                <button class="modal-close" onclick="hideModal('import-modal')">&times;</button>
+            </div>
+            <form id="import-form">
+                <div class="file-input-wrapper">
+                    <label>选择Excel文件（支持.xlsx, .xls格式）</label>
+                    <input type="file" id="excel-file" accept=".xlsx,.xls" required>
+                    <p style="margin-top: 10px; color: #666; font-size: 12px;">
+                        Excel应包含以下列：经办人、经办部门、合同状态、合同当前阶段、采购名称、合同分类、合同名称、合同编号、合同起始日、合同到期日、合同总金额、采购申请总体预算金额、已签订合同金额、验收截止日期、维保期、合同标的内容、合同签署日期、呈报领导、合同请示完成日期
+                    </p>
+                </div>
+                <div class="import-progress" id="import-progress">
+                    <p><i class="fa-solid fa-spinner fa-spin"></i> 正在导入...</p>
+                </div>
+                <div class="import-result" id="import-result"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('import-modal')">取消</button>
+                    <button type="submit" class="btn import-btn" id="import-submit-btn">
+                        <i class="fa-solid fa-upload"></i> 开始导入
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 履行情况导入模态框 -->
+    <div class="modal import-modal" id="performance-import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>导入合同履行情况</h2>
+                <button class="modal-close" onclick="hideModal('performance-import-modal')">&times;</button>
+            </div>
+            <form id="performance-import-form">
+                <div class="file-input-wrapper">
+                    <label>选择履行情况Excel文件（支持.xlsx, .xls格式）</label>
+                    <input type="file" id="performance-excel-file" accept=".xlsx,.xls" required>
+                    <p style="margin-top: 10px; color: #666; font-size: 12px;">
+                        Excel应包含以下列：单据编号、合同编号<br>
+                        系统将根据合同编号统计报送数量，按单据编号去重，按每月1报的频率计算履行情况等级
+                    </p>
+                </div>
+                <div class="import-progress" id="performance-import-progress">
+                    <p><i class="fa-solid fa-spinner fa-spin"></i> 正在导入...</p>
+                </div>
+                <div class="import-result" id="performance-import-result"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('performance-import-modal')">取消</button>
+                    <button type="submit" class="btn import-btn performance-import-btn" id="performance-import-submit-btn">
+                        <i class="fa-solid fa-upload"></i> 开始导入
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- 新增/编辑合同模态框 -->
     <div class="modal" id="contract-modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
                 <h2 id="modal-title">新增合同</h2>
                 <button class="modal-close" onclick="hideModal('contract-modal')">&times;</button>
             </div>
             <form id="contract-form">
                 <input type="hidden" id="contract-id">
-                <div class="form-group">
-                    <label>合同编号 *</label>
-                    <input type="text" id="contract-no" required>
-                </div>
-                <div class="form-group">
-                    <label>合同标题 *</label>
-                    <input type="text" id="contract-title" required>
-                </div>
-                <div class="form-group">
-                    <label>合同类型 *</label>
-                    <select id="contract-type" required>
-                        <option value="">请选择</option>
-                        <option value="采购合同">采购合同</option>
-                        <option value="销售合同">销售合同</option>
-                        <option value="服务合同">服务合同</option>
-                        <option value="租赁合同">租赁合同</option>
-                        <option value="劳动合同">劳动合同</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>甲方</label>
-                    <input type="text" id="party-a">
-                </div>
-                <div class="form-group">
-                    <label>乙方</label>
-                    <input type="text" id="party-b">
-                </div>
-                <div class="form-group">
-                    <label>金额</label>
-                    <input type="number" id="amount" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label>开始日期</label>
-                    <input type="date" id="start-date">
-                </div>
-                <div class="form-group">
-                    <label>结束日期</label>
-                    <input type="date" id="end-date">
-                </div>
-                <div class="form-group">
-                    <label>状态</label>
-                    <select id="contract-status">
-                        <option value="pending">待审核</option>
-                        <option value="active">已生效</option>
-                        <option value="completed">已完成</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>风险等级</label>
-                    <select id="risk-level">
-                        <option value="low">低风险</option>
-                        <option value="medium">中风险</option>
-                        <option value="high">高风险</option>
-                    </select>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>经办人</label>
+                        <input type="text" id="agent">
+                    </div>
+                    <div class="form-group">
+                        <label>经办部门</label>
+                        <input type="text" id="agent-department">
+                    </div>
+                    <div class="form-group">
+                        <label>合同状态</label>
+                        <select id="contract-status">
+                            <option value="正常">正常</option>
+                            <option value="已变更">已变更</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>合同当前阶段</label>
+                        <select id="contract-stage">
+                            <option value="">请选择</option>
+                            <option value="履行中">履行中</option>
+                            <option value="履行期结束未验收">履行期结束未验收</option>
+                            <option value="履行期结束已验收">履行期结束已验收</option>
+                            <option value="维保期进行中">维保期进行中</option>
+                            <option value="已结束">已结束</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>采购名称</label>
+                        <input type="text" id="procurement-name">
+                    </div>
+                    <div class="form-group">
+                        <label>合同分类</label>
+                        <input type="text" id="contract-category">
+                    </div>
+                    <div class="form-group">
+                        <label>合同名称 *</label>
+                        <input type="text" id="contract-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>合同编号 *</label>
+                        <input type="text" id="contract-no" required>
+                    </div>
+                    <div class="form-group">
+                        <label>合同起始日</label>
+                        <input type="date" id="start-date">
+                    </div>
+                    <div class="form-group">
+                        <label>合同到期日</label>
+                        <input type="date" id="end-date">
+                    </div>
+                    <div class="form-group">
+                        <label>合同总金额</label>
+                        <input type="number" id="amount" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>采购申请总体预算金额</label>
+                        <input type="number" id="budget-amount" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>已签订合同金额</label>
+                        <input type="number" id="signed-amount" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>验收截止日期</label>
+                        <input type="date" id="acceptance-deadline">
+                    </div>
+                    <div class="form-group">
+                        <label>维保期</label>
+                        <input type="text" id="warranty-period">
+                    </div>
+                    <div class="form-group">
+                        <label>合同签署日期</label>
+                        <input type="date" id="signed-date">
+                    </div>
+                    <div class="form-group">
+                        <label>呈报领导</label>
+                        <input type="text" id="submit-leader">
+                    </div>
+                    <div class="form-group">
+                        <label>合同请示完成日期</label>
+                        <input type="date" id="submission-completed-date">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>合同标的内容</label>
+                        <textarea id="contract-content" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>合同类型 *</label>
+                        <select id="contract-type" required>
+                            <option value="">请选择</option>
+                            <option value="采购合同">采购合同</option>
+                            <option value="销售合同">销售合同</option>
+                            <option value="服务合同">服务合同</option>
+                            <option value="租赁合同">租赁合同</option>
+                            <option value="劳动合同">劳动合同</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>风险等级</label>
+                        <select id="risk-level">
+                            <option value="low">低风险</option>
+                            <option value="medium">中风险</option>
+                            <option value="high">高风险</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="hideModal('contract-modal')">取消</button>
@@ -189,26 +388,38 @@
     <script src="/js/common.js"></script>
     <script>
         let currentPage = 1;
-        const pageSize = 10;
+        const pageSize = 20;
 
-        // 页面加载检查
         if (!checkAuth()) {
-            // 未登录，跳转到登录页
         } else {
-            // 已登录，加载数据
             loadContracts();
             setUserProfile();
             generateSidebarNav();
         }
 
+        // 获取履行情况等级样式
+        function getGradeClass(grade) {
+            switch(grade) {
+                case '优': return 'grade-excellent';
+                case '良': return 'grade-good';
+                case '中': return 'grade-medium';
+                case '差': return 'grade-poor';
+                default: return '';
+            }
+        }
+
         // 加载合同列表
         async function loadContracts() {
             const status = document.getElementById('status-filter').value;
+            const stage = document.getElementById('stage-filter').value;
             const type = document.getElementById('type-filter').value;
+            const search = document.getElementById('search-input').value;
             
             let url = `/contracts?page=${currentPage}&limit=${pageSize}`;
-            if (status) url += `&status=${status}`;
+            if (status) url += `&status=${encodeURIComponent(status)}`;
+            if (stage) url += `&stage=${encodeURIComponent(stage)}`;
             if (type) url += `&type=${encodeURIComponent(type)}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
 
             try {
                 const response = await apiGet(url);
@@ -225,20 +436,44 @@
         function renderContractsTable(contracts) {
             const tbody = document.getElementById('contracts-table');
             if (contracts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">暂无合同数据</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="21" style="text-align: center;">暂无合同数据</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = contracts.map(contract => `
+            tbody.innerHTML = contracts.map(contract => {
+                // 履行情况显示（仅履行中的合同显示）
+                let performanceDisplay = '-';
+                if (contract.contract_stage === '履行中') {
+                    if (contract.performance_grade) {
+                        performanceDisplay = `<span class="${getGradeClass(contract.performance_grade)}">${contract.performance_grade}</span>`;
+                        if (contract.report_count !== undefined && contract.expected_reports !== undefined) {
+                            performanceDisplay += `<br><small style="color:#666;">${contract.report_count}/${contract.expected_reports}次</small>`;
+                        }
+                    }
+                }
+                
+                return `
                 <tr>
-                    <td>${contract.contract_no}</td>
-                    <td>${contract.title}</td>
-                    <td>${contract.type}</td>
-                    <td>${formatAmount(contract.amount)}</td>
+                    <td>${performanceDisplay}</td>
+                    <td>${contract.agent || '-'}</td>
+                    <td>${contract.agent_department || '-'}</td>
+                    <td><span class="status ${contract.status === '已变更' ? 'status-warning' : 'status-active'}">${contract.status || '正常'}</span></td>
+                    <td>${contract.contract_stage || '-'}</td>
+                    <td>${contract.title || '-'}</td>
+                    <td>${contract.procurement_name || '-'}</td>
+                    <td>${contract.contract_category || contract.type || '-'}</td>
+                    <td>${contract.contract_no || '-'}</td>
                     <td>${formatDate(contract.start_date)}</td>
                     <td>${formatDate(contract.end_date)}</td>
-                    <td><span class="status ${getStatusClass(contract.status)}">${getStatusText(contract.status)}</span></td>
-                    <td><span class="status ${getStatusClass(contract.risk_level)}">${getStatusText(contract.risk_level)}</span></td>
+                    <td>${formatAmount(contract.amount)}</td>
+                    <td>${formatAmount(contract.budget_amount)}</td>
+                    <td>${formatAmount(contract.signed_amount)}</td>
+                    <td>${formatDate(contract.acceptance_deadline)}</td>
+                    <td>${contract.warranty_period || '-'}</td>
+                    <td title="${contract.contract_content || ''}" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${contract.contract_content || '-'}</td>
+                    <td>${formatDate(contract.signed_date)}</td>
+                    <td>${contract.submit_leader || '-'}</td>
+                    <td>${formatDate(contract.submission_completed_date)}</td>
                     <td>
                         <button class="btn btn-secondary" onclick="editContract(${contract.id})" style="padding: 5px 10px; font-size: 12px;">
                             <i class="fa-solid fa-edit"></i>
@@ -248,7 +483,7 @@
                         </button>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         // 渲染分页
@@ -260,6 +495,155 @@
                 loadContracts();
             }));
         }
+
+        // 显示合同导入模态框
+        function showImportModal() {
+            document.getElementById('import-form').reset();
+            document.getElementById('import-progress').style.display = 'none';
+            document.getElementById('import-result').style.display = 'none';
+            document.getElementById('import-submit-btn').disabled = false;
+            showModal('import-modal');
+        }
+
+        // 显示履行情况导入模态框
+        function showPerformanceImportModal() {
+            document.getElementById('performance-import-form').reset();
+            document.getElementById('performance-import-progress').style.display = 'none';
+            document.getElementById('performance-import-result').style.display = 'none';
+            document.getElementById('performance-import-submit-btn').disabled = false;
+            showModal('performance-import-modal');
+        }
+
+        // 处理合同Excel导入
+        document.getElementById('import-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('excel-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('请选择Excel文件', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const progressDiv = document.getElementById('import-progress');
+            const resultDiv = document.getElementById('import-result');
+            const submitBtn = document.getElementById('import-submit-btn');
+            
+            progressDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            try {
+                const token = getToken();
+                const response = await fetch('/api/contracts/import', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                progressDiv.style.display = 'none';
+                resultDiv.style.display = 'block';
+                
+                if (result.success) {
+                    resultDiv.className = 'import-result success';
+                    resultDiv.innerHTML = `
+                        <p><i class="fa-solid fa-check-circle"></i> ${result.message}</p>
+                        <p>总记录数: ${result.data.total}</p>
+                        <p>成功导入: ${result.data.successCount}（新增: ${result.data.createdCount}，更新: ${result.data.updatedCount}）</p>
+                        ${result.data.errorCount > 0 ? `<p>失败记录: ${result.data.errorCount}</p>` : ''}
+                        ${result.data.errors && result.data.errors.length > 0 ? `<details><summary>错误详情</summary><ul>${result.data.errors.map(e => `<li>${e}</li>`).join('')}</ul></details>` : ''}
+                    `;
+                    loadContracts();
+                } else {
+                    resultDiv.className = 'import-result error';
+                    resultDiv.innerHTML = `<p><i class="fa-solid fa-times-circle"></i> ${result.message}</p>`;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('导入失败:', error);
+                progressDiv.style.display = 'none';
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'import-result error';
+                resultDiv.innerHTML = `<p><i class="fa-solid fa-times-circle"></i> 导入失败: ${error.message}</p>`;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // 处理履行情况Excel导入
+        document.getElementById('performance-import-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('performance-excel-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('请选择Excel文件', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const progressDiv = document.getElementById('performance-import-progress');
+            const resultDiv = document.getElementById('performance-import-result');
+            const submitBtn = document.getElementById('performance-import-submit-btn');
+            
+            progressDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            try {
+                const token = getToken();
+                const response = await fetch('/api/contracts/import-performance', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                progressDiv.style.display = 'none';
+                resultDiv.style.display = 'block';
+                
+                if (result.success) {
+                    resultDiv.className = 'import-result success';
+                    let statsHtml = '';
+                    if (result.data.stats) {
+                        statsHtml = '<p><strong>各合同报送统计：</strong></p><ul>';
+                        for (const [contractNo, count] of Object.entries(result.data.stats)) {
+                            statsHtml += `<li>${contractNo}: ${count}次</li>`;
+                        }
+                        statsHtml += '</ul>';
+                    }
+                    resultDiv.innerHTML = `
+                        <p><i class="fa-solid fa-check-circle"></i> ${result.message}</p>
+                        <p>总记录数: ${result.data.total}</p>
+                        <p>成功导入: ${result.data.successCount}</p>
+                        ${result.data.errorCount > 0 ? `<p>失败记录: ${result.data.errorCount}</p>` : ''}
+                        ${statsHtml}
+                        ${result.data.errors && result.data.errors.length > 0 ? `<details><summary>错误详情</summary><ul>${result.data.errors.map(e => `<li>${e}</li>`).join('')}</ul></details>` : ''}
+                    `;
+                    loadContracts();
+                } else {
+                    resultDiv.className = 'import-result error';
+                    resultDiv.innerHTML = `<p><i class="fa-solid fa-times-circle"></i> ${result.message}</p>`;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('导入失败:', error);
+                progressDiv.style.display = 'none';
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'import-result error';
+                resultDiv.innerHTML = `<p><i class="fa-solid fa-times-circle"></i> 导入失败: ${error.message}</p>`;
+                submitBtn.disabled = false;
+            }
+        });
 
         // 显示新增模态框
         function showAddModal() {
@@ -277,16 +661,27 @@
                     const contract = response.data;
                     document.getElementById('modal-title').textContent = '编辑合同';
                     document.getElementById('contract-id').value = contract.id;
-                    document.getElementById('contract-no').value = contract.contract_no;
-                    document.getElementById('contract-title').value = contract.title;
-                    document.getElementById('contract-type').value = contract.type;
-                    document.getElementById('party-a').value = contract.party_a || '';
-                    document.getElementById('party-b').value = contract.party_b || '';
-                    document.getElementById('amount').value = contract.amount || '';
+                    document.getElementById('contract-no').value = contract.contract_no || '';
+                    document.getElementById('contract-title').value = contract.title || '';
+                    document.getElementById('contract-type').value = contract.type || '';
+                    document.getElementById('agent').value = contract.agent || '';
+                    document.getElementById('agent-department').value = contract.agent_department || '';
+                    document.getElementById('contract-status').value = contract.status || '正常';
+                    document.getElementById('contract-stage').value = contract.contract_stage || '';
+                    document.getElementById('procurement-name').value = contract.procurement_name || '';
+                    document.getElementById('contract-category').value = contract.contract_category || '';
                     document.getElementById('start-date').value = contract.start_date || '';
                     document.getElementById('end-date').value = contract.end_date || '';
-                    document.getElementById('contract-status').value = contract.status;
-                    document.getElementById('risk-level').value = contract.risk_level;
+                    document.getElementById('amount').value = contract.amount || '';
+                    document.getElementById('budget-amount').value = contract.budget_amount || '';
+                    document.getElementById('signed-amount').value = contract.signed_amount || '';
+                    document.getElementById('acceptance-deadline').value = contract.acceptance_deadline || '';
+                    document.getElementById('warranty-period').value = contract.warranty_period || '';
+                    document.getElementById('signed-date').value = contract.signed_date || '';
+                    document.getElementById('submit-leader').value = contract.submit_leader || '';
+                    document.getElementById('submission-completed-date').value = contract.submission_completed_date || '';
+                    document.getElementById('contract-content').value = contract.contract_content || '';
+                    document.getElementById('risk-level').value = contract.risk_level || 'low';
                     showModal('contract-modal');
                 }
             } catch (error) {
@@ -323,12 +718,23 @@
                 contract_no: document.getElementById('contract-no').value,
                 title: document.getElementById('contract-title').value,
                 type: document.getElementById('contract-type').value,
-                party_a: document.getElementById('party-a').value,
-                party_b: document.getElementById('party-b').value,
-                amount: document.getElementById('amount').value ? parseFloat(document.getElementById('amount').value) : null,
+                agent: document.getElementById('agent').value,
+                agent_department: document.getElementById('agent-department').value,
+                status: document.getElementById('contract-status').value,
+                contract_stage: document.getElementById('contract-stage').value,
+                procurement_name: document.getElementById('procurement-name').value,
+                contract_category: document.getElementById('contract-category').value,
                 start_date: document.getElementById('start-date').value || null,
                 end_date: document.getElementById('end-date').value || null,
-                status: document.getElementById('contract-status').value,
+                amount: document.getElementById('amount').value ? parseFloat(document.getElementById('amount').value) : null,
+                budget_amount: document.getElementById('budget-amount').value ? parseFloat(document.getElementById('budget-amount').value) : null,
+                signed_amount: document.getElementById('signed-amount').value ? parseFloat(document.getElementById('signed-amount').value) : null,
+                acceptance_deadline: document.getElementById('acceptance-deadline').value || null,
+                warranty_period: document.getElementById('warranty-period').value,
+                signed_date: document.getElementById('signed-date').value || null,
+                submit_leader: document.getElementById('submit-leader').value,
+                submission_completed_date: document.getElementById('submission-completed-date').value || null,
+                contract_content: document.getElementById('contract-content').value,
                 risk_level: document.getElementById('risk-level').value,
                 created_by: getUser().id
             };
@@ -357,6 +763,7 @@
         // 搜索和筛选
         document.getElementById('search-input').addEventListener('input', debounce(loadContracts, 500));
         document.getElementById('status-filter').addEventListener('change', loadContracts);
+        document.getElementById('stage-filter').addEventListener('change', loadContracts);
         document.getElementById('type-filter').addEventListener('change', loadContracts);
 
         // 防抖函数

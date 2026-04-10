@@ -91,10 +91,47 @@ async function apiRequest(url, options = {}) {
             throw new Error(data.message || '请求失败');
         }
         
+        // 请求成功后，如果不是刷新token的请求，则自动刷新token
+        if (url !== '/auth/refresh' && token) {
+            refreshTokenSilently();
+        }
+        
         return data;
     } catch (error) {
         console.error('API 请求错误:', error);
         throw error;
+    }
+}
+
+// 静默刷新token
+let isRefreshing = false;
+async function refreshTokenSilently() {
+    if (isRefreshing) return;
+    isRefreshing = true;
+    
+    try {
+        const token = getToken();
+        if (!token) return;
+        
+        const response = await fetch(`${API_BASE}/auth/refresh`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data && data.data.token) {
+                localStorage.setItem('token', data.data.token);
+            }
+        }
+    } catch (error) {
+        // 静默失败，不影响用户体验
+        console.error('刷新token失败:', error);
+    } finally {
+        isRefreshing = false;
     }
 }
 

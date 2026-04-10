@@ -46,7 +46,7 @@ router.post('/login', (req, res) => {
         role: user.role 
       },
       JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '2h' }
     );
 
     // 返回用户信息（不包含密码）
@@ -152,10 +152,16 @@ router.get('/profile', (req, res) => {
     });
 
   } catch (error) {
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: '认证令牌无效或已过期，请重新登录'
+      });
+    }
     console.error('获取用户信息错误:', error);
-    res.status(401).json({
+    res.status(500).json({
       success: false,
-      message: '认证令牌无效或已过期，请重新登录'
+      message: '服务器错误'
     });
   }
 });
@@ -207,13 +213,13 @@ router.put('/password', (req, res) => {
     });
 
   } catch (error) {
-    console.error('修改密码错误:', error);
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
         message: '认证令牌无效或已过期，请重新登录'
       });
     }
+    console.error('修改密码错误:', error);
     res.status(500).json({
       success: false,
       message: '服务器错误'
@@ -252,13 +258,77 @@ router.get('/modules', (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取模块配置错误:', error);
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
         message: '认证令牌无效或已过期，请重新登录'
       });
     }
+    console.error('获取模块配置错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '服务器错误'
+    });
+  }
+});
+
+// 刷新token
+router.post('/refresh', (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: '未提供认证令牌'
+      });
+    }
+
+    // 验证当前token（即使过期也要能解码）
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        // token过期但仍可解码
+        decoded = jwt.decode(token);
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: '认证令牌无效，请重新登录'
+        });
+      }
+    }
+
+    // 检查用户是否存在
+    const user = db.prepare('SELECT id, username, role FROM users WHERE id = ?').get(decoded.id);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: '用户不存在，请重新登录'
+      });
+    }
+
+    // 生成新token
+    const newToken = jwt.sign(
+      { 
+        id: user.id, 
+        username: user.username,
+        role: user.role 
+      },
+      JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    res.json({
+      success: true,
+      data: {
+        token: newToken
+      }
+    });
+
+  } catch (error) {
+    console.error('刷新token错误:', error);
     res.status(500).json({
       success: false,
       message: '服务器错误'
