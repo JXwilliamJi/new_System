@@ -97,9 +97,20 @@ function calculatePerformanceGrade(actualCount, expectedCount) {
 // 获取所有合同
 router.get('/', (req, res) => {
   try {
-    const { status, type, stage, search, page = 1, limit = 20 } = req.query;
+    const { status, type, stage, department, expiring, search, page = 1, limit = 20 } = req.query;
+
     let whereClause = '';
     const params = [];
+
+    // expiring 过滤器：3个月内即将到期的合同
+    if (expiring === '1') {
+      const today = new Date().toISOString().split('T')[0];
+      const threeMonthsLater = new Date();
+      threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+      const futureDate = threeMonthsLater.toISOString().split('T')[0];
+      whereClause = ' WHERE c.end_date IS NOT NULL AND c.end_date >= ? AND c.end_date <= ?';
+      params.push(today, futureDate);
+    }
 
     if (status) {
       whereClause += ' WHERE c.status = ?';
@@ -107,13 +118,22 @@ router.get('/', (req, res) => {
     }
 
     if (type) {
-      whereClause += whereClause ? ' AND c.type = ?' : ' WHERE c.type = ?';
-      params.push(type);
+      if (type === '其他合同') {
+        whereClause += whereClause ? " AND c.type NOT IN ('采购合同', '销售合同')" : " WHERE c.type NOT IN ('采购合同', '销售合同')";
+      } else {
+        whereClause += whereClause ? ' AND c.type = ?' : ' WHERE c.type = ?';
+        params.push(type);
+      }
     }
 
     if (stage) {
       whereClause += whereClause ? ' AND c.contract_stage = ?' : ' WHERE c.contract_stage = ?';
       params.push(stage);
+    }
+
+    if (department) {
+      whereClause += whereClause ? ' AND c.agent_department = ?' : ' WHERE c.agent_department = ?';
+      params.push(department);
     }
 
     if (search) {
@@ -195,6 +215,62 @@ router.get('/', (req, res) => {
 
   } catch (error) {
     console.error('获取合同列表错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '服务器错误'
+    });
+  }
+});
+
+// 合同数据汇总
+router.get('/summary', (req, res) => {
+  try {
+    const totalCount = db.prepare('SELECT COUNT(*) as count FROM contracts').get().count;
+
+    const departmentStats = db.prepare(`
+      SELECT agent_department as department, COUNT(*) as count 
+      FROM contracts 
+      WHERE agent_department IS NOT NULL AND agent_department != '' 
+      GROUP BY agent_department 
+      ORDER BY count DESC
+    `).all();
+
+    const typeStats = db.prepare(`
+      SELECT 
+        CASE 
+          WHEN type IN ('采购合同') THEN '采购合同'
+          WHEN type IN ('销售合同') THEN '销售合同'
+          ELSE '其他合同'
+        END as category,
+        COUNT(*) as count
+      FROM contracts
+      GROUP BY category
+      ORDER BY count DESC
+    `).all();
+
+    const threeMonthsLater = new Date();
+    threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+    const today = new Date().toISOString().split('T')[0];
+    const futureDate = threeMonthsLater.toISOString().split('T')[0];
+
+    const expiringCount = db.prepare(`
+      SELECT COUNT(*) as count 
+      FROM contracts 
+      WHERE end_date IS NOT NULL AND end_date >= ? AND end_date <= ?
+    `).get(today, futureDate).count;
+
+    res.json({
+      success: true,
+      data: {
+        totalCount,
+        departmentStats,
+        typeStats,
+        expiringCount
+      }
+    });
+
+  } catch (error) {
+    console.error('获取合同汇总数据错误:', error);
     res.status(500).json({
       success: false,
       message: '服务器错误'
