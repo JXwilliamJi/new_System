@@ -157,8 +157,12 @@ async function apiPut(url, data) {
 }
 
 // DELETE 请求
-async function apiDelete(url) {
-    return apiRequest(url, { method: 'DELETE' });
+async function apiDelete(url, data) {
+    const options = { method: 'DELETE' };
+    if (data) {
+        options.body = JSON.stringify(data);
+    }
+    return apiRequest(url, options);
 }
 
 // 显示提示信息

@@ -409,4 +409,141 @@ router.delete('/departments/:id', authenticateToken, requireAdmin, (req, res) =>
   }
 });
 
+// ==================== 批量删除数据 ====================
+
+// 获取合同列表（用于批量选择）
+router.get('/contracts', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const records = db.prepare('SELECT id, contract_no, title, status, created_at FROM contracts ORDER BY id DESC').all();
+    res.json({ success: true, data: records });
+  } catch (error) {
+    console.error('获取合同列表错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 批量删除合同
+router.delete('/contracts/batch', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: '请选择要删除的数据' });
+    }
+    const placeholders = ids.map(() => '?').join(',');
+    const result = db.prepare(`DELETE FROM contracts WHERE id IN (${placeholders})`).run(...ids);
+    res.json({ success: true, message: `成功删除 ${result.changes} 条合同数据` });
+  } catch (error) {
+    console.error('批量删除合同错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 获取制度列表（用于批量选择）
+router.get('/regulations', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const records = db.prepare('SELECT id, title, category, status, created_at FROM regulations ORDER BY id DESC').all();
+    res.json({ success: true, data: records });
+  } catch (error) {
+    console.error('获取制度列表错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 批量删除制度
+router.delete('/regulations/batch', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: '请选择要删除的数据' });
+    }
+    const placeholders = ids.map(() => '?').join(',');
+    const result = db.prepare(`DELETE FROM regulations WHERE id IN (${placeholders})`).run(...ids);
+    res.json({ success: true, message: `成功删除 ${result.changes} 条制度数据` });
+  } catch (error) {
+    console.error('批量删除制度错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 获取合规检查列表（用于批量选择）
+router.get('/compliance', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const records = db.prepare('SELECT id, title, type, result, status, created_at FROM compliance_checks ORDER BY id DESC').all();
+    res.json({ success: true, data: records });
+  } catch (error) {
+    console.error('获取合规检查列表错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 批量删除合规检查
+router.delete('/compliance/batch', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: '请选择要删除的数据' });
+    }
+    const placeholders = ids.map(() => '?').join(',');
+    const result = db.prepare(`DELETE FROM compliance_checks WHERE id IN (${placeholders})`).run(...ids);
+    res.json({ success: true, message: `成功删除 ${result.changes} 条合规检查数据` });
+  } catch (error) {
+    console.error('批量删除合规检查错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 获取风险列表（用于批量选择）
+router.get('/risks', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const records = db.prepare('SELECT id, title, category, level, status, created_at FROM risks ORDER BY id DESC').all();
+    res.json({ success: true, data: records });
+  } catch (error) {
+    console.error('获取风险列表错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 批量删除风险
+router.delete('/risks/batch', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: '请选择要删除的数据' });
+    }
+    const placeholders = ids.map(() => '?').join(',');
+    const result = db.prepare(`DELETE FROM risks WHERE id IN (${placeholders})`).run(...ids);
+    res.json({ success: true, message: `成功删除 ${result.changes} 条风险数据` });
+  } catch (error) {
+    console.error('批量删除风险错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 获取部门工作列表（用于批量选择）
+router.get('/department-work', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const records = db.prepare('SELECT id, serial_number, task_name, progress_status, created_at FROM department_work ORDER BY id DESC').all();
+    res.json({ success: true, data: records });
+  } catch (error) {
+    console.error('获取部门工作列表错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+// 批量删除部门工作
+router.delete('/department-work/batch', authenticateToken, requireAdmin, (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: '请选择要删除的数据' });
+    }
+    const placeholders = ids.map(() => '?').join(',');
+    const result = db.prepare(`DELETE FROM department_work WHERE id IN (${placeholders})`).run(...ids);
+    res.json({ success: true, message: `成功删除 ${result.changes} 条部门工作数据` });
+  } catch (error) {
+    console.error('批量删除部门工作错误:', error);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
 module.exports = router;

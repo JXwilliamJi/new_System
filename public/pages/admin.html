@@ -461,6 +461,34 @@
         .log-user {
             color: #666;
         }
+
+        .batch-tab {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .batch-tab:hover {
+            border-color: #1a3c6e;
+            color: #1a3c6e;
+        }
+
+        .batch-tab.active {
+            background: #1a3c6e;
+            color: white;
+            border-color: #1a3c6e;
+        }
+
+        .batch-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -477,6 +505,7 @@
                 <li><a href="#" data-section="departments"><i class="fa-solid fa-building"></i> 部门配置</a></li>
                 <li><a href="#" data-section="users"><i class="fa-solid fa-users"></i> 用户管理</a></li>
                 <li><a href="#" data-section="stats"><i class="fa-solid fa-chart-bar"></i> 平台统计</a></li>
+                <li><a href="#" data-section="batch-delete"><i class="fa-solid fa-trash-can"></i> 批量删除数据</a></li>
                 <li><a href="#" data-section="logs"><i class="fa-solid fa-list"></i> 平台日志</a></li>
                 <li><a href="/pages/dashboard.html"><i class="fa-solid fa-arrow-left"></i> 返回前台</a></li>
             </ul>
@@ -579,6 +608,59 @@
                         <tr><td colspan="6" style="text-align: center;">加载中...</td></tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- 批量删除数据 -->
+            <div id="batch-delete-section" class="admin-section" style="display: none;">
+                <h2><i class="fa-solid fa-trash-can"></i> 批量删除数据</h2>
+                <p style="color: #666; margin-bottom: 20px;">选择数据类型，勾选要删除的记录进行批量删除。此操作不可逆，请谨慎操作。</p>
+                <div id="batch-delete-alert"></div>
+                <!-- 数据类型选项卡 -->
+                <div class="batch-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button class="batch-tab active" data-batch-type="contracts" onclick="switchBatchType('contracts')">
+                        <i class="fa-solid fa-file-contract"></i> 合同数据
+                    </button>
+                    <button class="batch-tab" data-batch-type="regulations" onclick="switchBatchType('regulations')">
+                        <i class="fa-solid fa-book"></i> 制度数据
+                    </button>
+                    <button class="batch-tab" data-batch-type="compliance" onclick="switchBatchType('compliance')">
+                        <i class="fa-solid fa-clipboard-check"></i> 合规数据
+                    </button>
+                    <button class="batch-tab" data-batch-type="risks" onclick="switchBatchType('risks')">
+                        <i class="fa-solid fa-triangle-exclamation"></i> 风险数据
+                    </button>
+                    <button class="batch-tab" data-batch-type="department-work" onclick="switchBatchType('department-work')">
+                        <i class="fa-solid fa-tasks"></i> 部门工作
+                    </button>
+                </div>
+                <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
+                    <label style="display: flex; align-items: center; cursor: pointer; font-weight: 600;">
+                        <input type="checkbox" id="batch-select-all" onchange="toggleSelectAll()" style="margin-right: 5px;">
+                        全选 / 取消全选
+                    </label>
+                    <span id="batch-count" style="color: #666; font-size: 13px;"></span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <button class="btn-delete" onclick="batchDelete()" style="padding: 10px 25px; font-size: 14px;">
+                        <i class="fa-solid fa-trash"></i> 批量删除选中数据
+                    </button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="user-table" id="batch-table">
+                        <thead>
+                            <tr id="batch-table-header">
+                                <th style="width: 40px;">选择</th>
+                                <th>ID</th>
+                                <th id="batch-col2">标题/编号</th>
+                                <th id="batch-col3">类别/类型</th>
+                                <th id="batch-col4">状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batch-table-body">
+                            <tr><td colspan="5" style="text-align: center;">请选择上方数据类型加载数据</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- 平台统计 -->
@@ -885,6 +967,9 @@
                         break;
                     case 'stats':
                         loadStats();
+                        break;
+                    case 'batch-delete':
+                        switchBatchType('contracts');
                         break;
                     case 'logs':
                         loadLogs();
@@ -1476,6 +1561,171 @@
                 alert('更新失败，请稍后重试');
             }
         });
+
+        // ==================== 批量删除数据 ====================
+
+        let currentBatchType = 'contracts';
+        let currentBatchData = [];
+
+        // 切换批量删除的数据类型
+        async function switchBatchType(type) {
+            currentBatchType = type;
+            currentBatchData = [];
+            document.getElementById('batch-select-all').checked = false;
+            document.getElementById('batch-count').textContent = '';
+            document.getElementById('batch-delete-alert').innerHTML = '';
+
+            // 更新选项卡样式
+            document.querySelectorAll('.batch-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.batch-tab[data-batch-type="${type}"]`).classList.add('active');
+
+            // 更新表头
+            const headers = {
+                'contracts': ['选择', 'ID', '合同编号', '标题', '状态'],
+                'regulations': ['选择', 'ID', '标题', '类别', '状态'],
+                'compliance': ['选择', 'ID', '标题', '类型', '结果'],
+                'risks': ['选择', 'ID', '标题', '类别', '等级'],
+                'department-work': ['选择', 'ID', '序号', '任务名称', '状态']
+            };
+            const h = headers[type];
+            document.getElementById('batch-table-header').innerHTML = `
+                <th style="width: 40px;">${h[0]}</th>
+                <th>${h[1]}</th>
+                <th>${h[2]}</th>
+                <th>${h[3]}</th>
+                <th>${h[4]}</th>
+            `;
+
+            await loadBatchData(type);
+        }
+
+        // 加载批量数据
+        async function loadBatchData(type) {
+            const tbody = document.getElementById('batch-table-body');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">加载中...</td></tr>';
+
+            try {
+                const response = await apiGet(`/admin/${type}`);
+                if (response.success) {
+                    currentBatchData = response.data;
+                    renderBatchTable(currentBatchData);
+                }
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">加载失败</td></tr>';
+            }
+        }
+
+        // 渲染批量删除表格
+        function renderBatchTable(records) {
+            const tbody = document.getElementById('batch-table-body');
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">暂无数据</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = records.map(r => {
+                let col2, col3, col4;
+                switch (currentBatchType) {
+                    case 'contracts':
+                        col2 = r.contract_no || '-';
+                        col3 = r.title || '-';
+                        col4 = r.status || '-';
+                        break;
+                    case 'regulations':
+                        col2 = r.title || '-';
+                        col3 = r.category || '-';
+                        col4 = r.status || '-';
+                        break;
+                    case 'compliance':
+                        col2 = r.title || '-';
+                        col3 = r.type || '-';
+                        col4 = r.result || '-';
+                        break;
+                    case 'risks':
+                        col2 = r.title || '-';
+                        col3 = r.category || '-';
+                        col4 = r.level || '-';
+                        break;
+                    case 'department-work':
+                        col2 = r.serial_number || '-';
+                        col3 = r.task_name || '-';
+                        col4 = r.progress_status || '-';
+                        break;
+                    default:
+                        col2 = col3 = col4 = '-';
+                }
+                return `
+                    <tr>
+                        <td><input type="checkbox" class="batch-checkbox" data-id="${r.id}" onchange="updateSelectCount()"></td>
+                        <td>${r.id}</td>
+                        <td>${col2}</td>
+                        <td>${col3}</td>
+                        <td>${col4}</td>
+                    </tr>
+                `;
+            }).join('');
+            updateSelectCount();
+        }
+
+        // 全选/取消全选
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('batch-select-all').checked;
+            document.querySelectorAll('#batch-table-body .batch-checkbox').forEach(cb => {
+                cb.checked = selectAll;
+            });
+            updateSelectCount();
+        }
+
+        // 更新选中计数
+        function updateSelectCount() {
+            const checked = document.querySelectorAll('#batch-table-body .batch-checkbox:checked').length;
+            const total = document.querySelectorAll('#batch-table-body .batch-checkbox').length;
+            document.getElementById('batch-count').textContent = `已选择 ${checked} / ${total} 条`;
+        }
+
+        // 批量删除
+        async function batchDelete() {
+            const checkboxes = document.querySelectorAll('#batch-table-body .batch-checkbox:checked');
+            if (checkboxes.length === 0) {
+                const alertDiv = document.getElementById('batch-delete-alert');
+                alertDiv.innerHTML = '<div class="alert alert-error">请至少选择一条数据</div>';
+                setTimeout(() => { alertDiv.innerHTML = ''; }, 3000);
+                return;
+            }
+
+            const typeNames = {
+                'contracts': '合同数据',
+                'regulations': '制度数据',
+                'compliance': '合规数据',
+                'risks': '风险数据',
+                'department-work': '部门工作数据'
+            };
+
+            if (!confirm(`确定要删除选中的 ${checkboxes.length} 条${typeNames[currentBatchType]}吗？此操作不可逆！`)) {
+                return;
+            }
+
+            const ids = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-id')));
+
+            try {
+                const response = await apiDelete(`/admin/${currentBatchType}/batch`, { ids });
+                const alertDiv = document.getElementById('batch-delete-alert');
+                if (response.success) {
+                    alertDiv.innerHTML = `<div class="alert alert-success">${response.message}</div>`;
+                    document.getElementById('batch-select-all').checked = false;
+                    await loadBatchData(currentBatchType);
+                } else {
+                    alertDiv.innerHTML = `<div class="alert alert-error">${response.message}</div>`;
+                }
+                setTimeout(() => { alertDiv.innerHTML = ''; }, 5000);
+            } catch (error) {
+                console.error('批量删除失败:', error);
+                const alertDiv = document.getElementById('batch-delete-alert');
+                alertDiv.innerHTML = '<div class="alert alert-error">删除失败，请稍后重试</div>';
+                setTimeout(() => { alertDiv.innerHTML = ''; }, 5000);
+            }
+        }
 
         // 点击模态框外部关闭
         window.onclick = function(event) {

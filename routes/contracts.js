@@ -150,7 +150,7 @@ router.get('/', (req, res) => {
       FROM contracts c
       LEFT JOIN users u ON c.created_by = u.id
       ${whereClause}
-      ORDER BY c.created_at DESC
+      ORDER BY c.signed_date IS NULL ASC, c.signed_date DESC
       LIMIT ? OFFSET ?
     `).all(...params, parseInt(limit), parseInt(offset));
 

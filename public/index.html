@@ -50,8 +50,8 @@
             window.location.href = '/pages/dashboard.html';
         }
 
-        // 登录按钮点击
-        document.getElementById('login-btn').addEventListener('click', async function() {
+        // 登录逻辑
+        async function handleLogin() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const alertContainer = document.getElementById('alert-container');
@@ -92,6 +92,17 @@
                     alertContainer.innerHTML = '';
                 }, 5000);
             }
+        }
+
+        // 登录按钮点击
+        document.getElementById('login-btn').addEventListener('click', handleLogin);
+
+        // 键盘回车登录
+        document.getElementById('username').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+        document.getElementById('password').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleLogin();
         });
     </script>
 </body>
